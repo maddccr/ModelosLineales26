@@ -61,6 +61,27 @@ summary(mod) #depende del objeto // es un metodo
 
 #SIGNIFICADO DE LOS BETITAS 
 
+#con otras muestras otras estimaciones! suujetas a variabilidad de la muestra
 
+ggplot(grillos, aes( x = chirps_15s, y = temp_F)) + geom_point(color = "deeppink") +
+  labs(title = "Temperatura en Fahrenheit vs. Estridulaciones") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  geom_smooth(method = "lm")
+
+#le hace una banda de confianza!!!!! no punto a puntpo
+
+#analisis repetido para chirps centrados
+grillos$chirps_cent <- grillos$chirps_15s - mean(grillos$chirps_15s)
+
+mod2 <- lm (temp_F ~ chirps_cent, grillos)
+
+summary(mod2)
+#centrar mantiene la rel, inclinacion!!! SOLO CAMBIA EL B0
+#OJITO INTERPRETACION DEL B0???????? temp promedio caundo chrip promedio?
+
+#predecimos temperatura para valor nuevo de chirps = 50
+predict(mod, newdata = data.frame(chirps_15s = 50))
+#82.17
 
 
