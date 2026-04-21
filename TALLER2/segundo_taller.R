@@ -24,4 +24,19 @@ modelito <- lm(esp_vida ~ pct_diabetes + pct_obesidad + pct_est_terc + ing_med_h
    data = Alabama)
 summary(modelito)
 
-#Beta de ing_med_hog --> 0,000085 PERO CUAL ES LA UNIDAD???
+#Beta de ing_med_hog --> 0,000085 PERO CUAL ES LA UNIDAD??? valor chico por la dif con la escala
+#USAR ESCALAS MAS PARECIDAS
+#significacion individual, p < 0,01 rechazo que no sirve pa nada. 
+#Si tiene una asociacion positiva con la esperanza de vida 
+#que significa???EN PROMEDIO unidad 1 dollar con lo demas constante aunmeta una horita. Cambiar la unidad a un dolar
+#cambiar la escala 
+
+#cuando aumenta una unidad es 1%
+
+
+#no tiene relacion, ajustando por las demas variables!!!!! si traen la mismo info 
+#SABER HACER TODO EL CUENTITO :(((((
+
+#r2 con tanto porcentage de la variabilidad explica 
+
+
