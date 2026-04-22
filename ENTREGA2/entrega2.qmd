@@ -81,6 +81,7 @@ Entonces son ortogonales
 **En el archivo pgc.txt se encuentran las mediciones de 252 personas. Se desea construir una fórmula que sea capaz de estimar el porcentaje de grasa corporal en función de algunas mediciones (circunferencia abdominal, circunferencia de cintura, de cuello, entre otras).**
 
 ```{r, mesagge = FALSE}
+
 #cargo librerias
 library(tidyverse)
 library(ggcorrplot)
