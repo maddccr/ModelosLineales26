@@ -83,6 +83,8 @@ En el archivo pgc.txt se encuentran las mediciones de 252 personas. Se desea con
 ```{r, mesagge = FALSE}
 library(tidyverse)
 library(ggcorrplot)
+library(kableExtra)
+library(knitr)
 #GGally ggpairs
 
 data <- read.table("pgc.txt", header = TRUE, dec = ",")
@@ -172,12 +174,17 @@ tabla <- data.frame(
   Modelo = c("m1", "m2", "m3", "m4"),
   R2 = sapply(modelos, function(x) summary(x)$r.squared),
   sigma2 = sapply(modelos, function(x) summary(x)$sigma^2),
-  beta_abdom = sapply(modelos, function(x) coef(x)["abdomen"])
+  coef_abdom = sapply(modelos, function(x) coef(x)["abdomen"])
 )
 
-tabla
+colnames(tabla) <- c("Modelo", "R²", "σ²", "Coef. Abdomen")
 
-knitr::kable(tabla, caption = "Comparación de modelos")
-
-#QUE ES EL SIGMA QUE TE DEVUELVE EL SUMMARY
+kable(tabla, caption = "Comparación de modelos", align = "c") |> 
+  kable_styling(
+    full_width = FALSE,
+    position = "center",
+    bootstrap_options = c("striped", "bordered", "hover")
+  ) |> 
+  column_spec(1, bold = TRUE) |> 
+  row_spec(0, bold = TRUE)
 ```
