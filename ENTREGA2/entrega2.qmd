@@ -148,9 +148,9 @@ Ajuste la siguiente serie de modelo
 ```{r}
 #modelos anidados
 
-m1 <- lm(porc_grasa ~ abdom, data = data)
+m1 <- lm(porc_grasa ~ abdomen, data = data)
 
-m2 <- update(m1, . ~ . + cintura)
+m2 <- update(m1, . ~ . + cadera)
 
 m3 <- update(m2, . ~ . + cuello)
 
