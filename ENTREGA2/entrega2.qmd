@@ -149,15 +149,36 @@ Ajuste la siguiente serie de modelo
 #modelos anidados
 
 m1 <- lm(porc_grasa ~ abdomen, data = data)
-
 m2 <- update(m1, . ~ . + cadera)
-
 m3 <- update(m2, . ~ . + cuello)
-
 m4 <- update(m3, . ~ . + muneca)
 
+modelos <- list(m1, m2, m3, m4)
+resumen <- lapply(modelos, summary)
+names(resumen) <- c("m1", "m2", "m3", "m4")
 
+resumen$m1$sigma
+```
+
+```{r}
+#extra comparar modelos con anova
 anova(m1, m2, m3, m4)
 ```
 
 R aumenta o es constante, se agregan variables no empeora el modelo
+
+```{r}
+
+tabla <- data.frame(
+  Modelo = c("m1", "m2", "m3", "m4"),
+  R2 = sapply(modelos, function(x) summary(x)$r.squared),
+  sigma2 = sapply(modelos, function(x) summary(x)$sigma^2),
+  beta_abdom = sapply(modelos, function(x) coef(x)["abdomen"])
+)
+
+tabla
+
+knitr::kable(tabla, caption = "Comparación de modelos")
+
+#QUE ES EL SIGMA QUE TE DEVUELVE EL SUMMARY
+```
