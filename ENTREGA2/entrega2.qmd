@@ -21,3 +21,93 @@ $X = (ingreso_1, ingreso_2, ..., ingreso_n)$
 **3. Encuentre una expresión para dicho sesgo.**
 
 **4. ¿Qué idea se le ocurre para solucionar el problema del sesgo y continuar trabajando con el modelo sin constante?**
+
+## EJERCICIO 7
+
+En el archivo pgc.txt se encuentran las mediciones de 252 personas. Se desea construir una fórmula que
+sea capaz de estimar el porcentaje de grasa corporal en función de algunas mediciones (circunferencia
+abdominal, circunferencia de cintura, de cuello, entre otras).
+
+```{r, mesagge = FALSE}
+setwd("~/ModelosLineales26/ENTREGA2")
+library(tidyverse)
+library(ggcorrplot)
+#GGally ggpairs
+
+data <- read.table("pgc.txt", header = TRUE, dec = ",")
+
+data[] <- sapply(data, as.numeric)
+str(data)
+```
+
+1\. Visualice la relación de cada una de las medidas corporales con respecto a la variable porc_grasa y
+estime las correlaciones.
+
+```{r}
+data_long <- pivot_longer(data, cols = -porc_grasa)
+
+ggplot(data_long, aes(x = value, y = porc_grasa)) +
+  geom_point(color = "pink", alpha = 0.8) +
+  geom_smooth(method = "lm", se = FALSE, color = "deeppink") +
+  facet_wrap(~name, scales = "free_x") +
+  theme_minimal()
+
+cor(data$porc_grasa, data[ , names(data) != "porc_grasa"])
+```
+
+2. Estime la matriz de correlación de las mediciones corporales
+
+```{r}
+cor(data) #devuelve varianza y correlaciones de la variables
+
+#visualizar
+ggcorrplot(cor(data))
+```
+
+3.  **Describa con sus palabras las conclusiones que haya podido obtener a partir de los dos puntos
+    anteriores.**
+
+4. Realice un conjunto de modelos de RLS (regresión lineal simple) que expliquen la relacion de cada medida corporal con respecto al porcentaje de grasa corporal.
+
+```{r}
+
+explicativas <- names(data)[names(data) != "porc_grasa"]
+#sacar los nombres de la variables explicativas
+
+modelitos <- lapply(explicativas, 
+      function(x){ #ajustar modelo para cada una
+        lm(as.formula(paste("porc_grasa ~", x)), data = data)
+      })
+
+#ahora queremos ver la info/summary de cada uno
+resumencitos <- lapply(modelitos, summary)
+names(resumencitos) <- explicativas
+
+resumencitos
+
+#summary(lm(porc_grasa ~ edad, data = data))
+
+```
+
+```{r}
+
+```
+
+Ajuste la siguiente serie de modelo
+
+```{r}
+#modelos anidados
+
+m1 <- lm(porc_grasa ~ abdom, data = data)
+
+m2 <- update(m1, . ~ . + cintura)
+
+m3 <- update(m2, . ~ . + cuello)
+
+m4 <- update(m3, . ~ . + muneca)
+
+
+anova(m1, m2, m3, m4)
+```
+
+R aumenta o es constante, se agregan variables no empeora el modelo
