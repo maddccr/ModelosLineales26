@@ -78,22 +78,24 @@ Entonces son ortogonales
 
 ## EJERCICIO 7
 
-En el archivo pgc.txt se encuentran las mediciones de 252 personas. Se desea construir una fórmula que sea capaz de estimar el porcentaje de grasa corporal en función de algunas mediciones (circunferencia abdominal, circunferencia de cintura, de cuello, entre otras).
+**En el archivo pgc.txt se encuentran las mediciones de 252 personas. Se desea construir una fórmula que sea capaz de estimar el porcentaje de grasa corporal en función de algunas mediciones (circunferencia abdominal, circunferencia de cintura, de cuello, entre otras).**
 
 ```{r, mesagge = FALSE}
+
+#cargo librerias
 library(tidyverse)
 library(ggcorrplot)
 library(kableExtra)
 library(knitr)
 #GGally ggpairs
 
-data <- read.table("pgc.txt", header = TRUE, dec = ",")
+data <- read.table("pgc.txt", header = TRUE, dec = ",") #guardo data organizada
 
-data[] <- sapply(data, as.numeric)
-str(data)
+data[] <- sapply(data, as.numeric) #lo paso a numericos
+str(data) #veo como estan compuestas las variables
 ```
 
-1\. Visualice la relación de cada una de las medidas corporales con respecto a la variable porc_grasa y estime las correlaciones.
+**1. Visualice la relación de cada una de las medidas corporales con respecto a la variable porc_grasa y estime las correlaciones.**
 
 ```{r}
 data_long <- pivot_longer(data, cols = -porc_grasa)
@@ -102,23 +104,29 @@ ggplot(data_long, aes(x = value, y = porc_grasa)) +
   geom_point(color = "pink", alpha = 0.8) +
   geom_smooth(method = "lm", se = FALSE, color = "deeppink") +
   facet_wrap(~name, scales = "free_x") +
-  theme_minimal()
+  theme_minimal() 
 
 cor(data$porc_grasa, data[ , names(data) != "porc_grasa"])
 ```
 
-2.  Estime la matriz de correlación de las mediciones corporales
+2.  **Estime la matriz de correlación de las mediciones corporales**
 
 ```{r}
 cor(data) #devuelve varianza y correlaciones de la variables
 
 #visualizar
-ggcorrplot(cor(data))
+ggcorrplot(cor(data)) #mapa de calor de matriz de correlacion
 ```
 
 3.  **Describa con sus palabras las conclusiones que haya podido obtener a partir de los dos puntos anteriores.**
 
-4.  Realice un conjunto de modelos de RLS (regresión lineal simple) que expliquen la relacion de cada medida corporal con respecto al porcentaje de grasa corporal.
+En el grafico de dispercion podemos observar una relacion positiva en la mayoria de los casos, aunque en algunos superior a otros. Por ejemlo, visualizamos que el abdomen y cadera estan fuertemente relacionados con una pendiente mayor respecto a altura y edad. En estas ultimas dos variables se observa una pendiente casi nula.
+
+En el mapa de calor de la matriz de correlación se corrobora esta afirmacion. Vemos que altura y edad tienen un coeficiente de correlacion respecto a porcentaje grasa en un color mas intenso cercano a 1, mientras que la altura por ejemplo es muy parecido a blanco (0). Tambien observamso que no hay ningun tono hacia el celeste/azul, resapldando el concepto de la no existencia de relación negativa.
+
+Los valores exactos los obtenemos en la matriz de correlación, los cuales sustentan las ideas de los graficos. Abdomen tiene una correlación con el porcentaje de grasa de un 0.8, cadera 0.6. , y edad 0.28. Por otro lado, altura -0.02, que aunque esta extremadamente cerca de 0, no es positiva.
+
+4.  **Realice un conjunto de modelos de RLS (regresión lineal simple) que expliquen la relacion de cada medida corporal con respecto al porcentaje de grasa corporal. ¿Qué observa?**
 
 ```{r}
 
@@ -139,6 +147,10 @@ resumencitos
 #summary(lm(porc_grasa ~ edad, data = data))
 
 ```
+
+QUE OBSERVO?
+
+en general la estimacion del beta es muy cercano a la correlacion. hay una relacion entre el beta y el coef de correlacion. La variable edad
 
 ```{r}
 
