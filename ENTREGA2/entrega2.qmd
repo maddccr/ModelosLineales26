@@ -4,4 +4,20 @@ format: html
 editor: visual
 ---
 
-## Quarto
+## EJERCICIO 5
+
+**Suponga que en una aplicación económica donde se quiere modelar el ahorro de un conjunto de hogares en función de sus ingresos, el modelo correcto a aplicar es:** $ahorro_i = \beta_0 + \beta_1 \, ingreso_i + \epsilon_i$ **Pero usted, decide eliminar la constante del modelo debido a que sin ingresos es imposible ahorrar. Por ende, ajusta el siguiente modelo:** $ahorro_i = \beta_1^{*} \, ingreso_i + \epsilon_i^{*}$
+
+**1. Demuestre que el estimador de m´ınimos cuadrados es:** $\hat{\beta}_1 = \frac{\sum_i ingreso_i \cdot ahorro_i}{\sum_i ingreso_i^2}$
+
+$\hat{\beta}_{\text{MCO}} = (X^{\top} X)^{-1} X^{\top} Y$
+
+En nuestro caso definimos $X=ingreso_i$ e $Y=ahorro_i$
+
+$X = (ingreso_1, ingreso_2, ..., ingreso_n)$
+
+**2. Demuestre que (si el modelo correcto incluye la constante) este estimador es sesgado.**
+
+**3. Encuentre una expresión para dicho sesgo.**
+
+**4. ¿Qué idea se le ocurre para solucionar el problema del sesgo y continuar trabajando con el modelo sin constante?**
