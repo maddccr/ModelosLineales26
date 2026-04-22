@@ -14,19 +14,71 @@ $\hat{\beta}_{\text{MCO}} = (X^{\top} X)^{-1} X^{\top} Y$
 
 En nuestro caso definimos $X=ingreso_i$ e $Y=ahorro_i$
 
-$X = (ingreso_1, ingreso_2, ..., ingreso_n)$
+$X= \begin{pmatrix}ingreso_1 \\ingreso_2 \\\vdots \\ingreso_n\end{pmatrix}$ $Y=\begin{pmatrix}ahorro_1 \\ahorro_2 \\\vdots \\ahorro_n\end{pmatrix}$
+
+$X^{\top} X = (ingreso_1, ingreso_2, \ldots, ingreso_n)\begin{pmatrix} ingreso_1 \\ ingreso_2 \\ \vdots \\ ingreso_n\end{pmatrix}= \sum_{i=1}^n ingreso_i^2$
+
+$(X^{\top} X) ^{-1} = \left( \sum_{i=1}^n ingreso_i ^2 \right) ^{-1} = \frac{1}{\sum_{i=1}^n ingreso_i^2}$
+
+$X^{\top} Y = (ingreso_1, ingreso_2, \ldots, ingreso_n)\begin{pmatrix}ahorro_1 \\ahorro_2 \\\vdots \\ahorro_n\end{pmatrix}= \sum_{i=1}^n ingreso_i \, ahorro_i$
+
+$\Rightarrow \hat{\beta}_{\text{MCO}} = \frac{\sum_{i=1}^n ingreso_i \, ahorro_i}{sum_{i=1}^n ingreso_i^2}$
 
 **2. Demuestre que (si el modelo correcto incluye la constante) este estimador es sesgado.**
 
+En la ppt Clase 6 diapo 14 se define
+
+$E\left(\hat{\beta}_1^{*}\right)= \beta_1 + (X_1^{\top} X_1)^{-1} X_1^{\top} X_2 \beta_2$
+
+En nuestro caso $Y = X_1 \beta_1 + X_2 \beta_0 + \epsilon$ siendo
+
+$Y=\begin{pmatrix}ahorro_1 \\ahorro_2 \\\vdots \\ahorro_n\end{pmatrix}$ $X_1= \begin{pmatrix}ingreso_1 \\ingreso_2 \\\vdots \\ingreso_n\end{pmatrix}$
+
+y $X_2 = \begin{pmatrix}1 \\1 \\\vdots \\1\end{pmatrix}$ una constante omitida pero relevante
+
+$(X_1 ^{\top} X_1) ^{-1} = \frac{1}{\sum_{i=1}^n ingreso_i ^2}$
+
+$X_1^{\top} X_2=(ingreso_1, ingreso_2, \ldots, ingreso_n)\begin{pmatrix}1 \\1 \\\vdots \\1\end{pmatrix}= \sum_{i=1}^n ingreso_i$
+
+$E\left(\hat{\beta}_1^{*}\right)= \beta_1 + \frac{\sum_{i=1}^n ingreso_i}{\sum_{i=1}^n ingreso_i^2} \, \beta_0$
+
+Asumimos que $\beta_0 \neq 0$
+
+$\Rightarrow$ SESGADO
+
 **3. Encuentre una expresión para dicho sesgo.**
+
+(Notas Inferencia p.72) Definición 3.4.2.
+
+Para un estimador real T de τ (θ), el sesgo de T se define como Bθ(T) = Eθ(T) − τ (θ), θ ∈ Θ.
+
+En nuestro caso, usando la definición
+
+$B(\hat{\beta}_1^{*}) = E(\hat{\beta}_1 ^{ * } ) - \beta_1$
+
+sustituyendo
+
+$B(\hat{\beta}_1^{*}) = \left( \beta_1 + \frac{\sum_{i=1}^n ingreso_i}{\sum_{i=1}^n ingreso_i^2} \, \beta_0 \right) - \beta_1 \Rightarrow B(\hat{\beta}_1^{*}) = \frac{\sum_{i=1}^n ingreso_i}{\sum_{i=1}^n ingreso_i^2} \, \beta_0$
 
 **4. ¿Qué idea se le ocurre para solucionar el problema del sesgo y continuar trabajando con el modelo sin constante?**
 
+Centar las variables seria buena idea para eliminar el sesgo sin incluir explicitamente la constante. Al hacer esto, pasan a tener media 0, que implica que la variable explicativa es ortogonal a la constante. Graficamente veriamos que la recta ajustada pasa por el origen (0), preservando la pendiente.
+
+Sea $\tilde{X_1}=X_1 - E(X_1)$. Queremos estudiar su ortogonalidad respecto a $X_2$
+
+$\tilde{X}_1 \perp X_2 \;\Longleftrightarrow\; \langle X_1, X_2 \rangle = 0$
+
+Ademas sabemos que por propiedad la media es el punto de equilibrio. Entonces
+
+$\tilde{x}_i = x_i - \bar{x}\quad \Rightarrow \quad\sum_{i=1}^n \tilde{x}_i = 0$
+
+$\langle \tilde{X_1}, X_2 \rangle = \tilde{X}_1^\top X_2 = (\tilde{ingreso}_1, \tilde{ingreso}_2, \ldots, \tilde{ingreso}_n)\begin{pmatrix}1 \\ 1 \\ \vdots \\ 1\end{pmatrix}= \sum_{i=1}^n \tilde{ingreso}_i = 0$
+
+Entonces son ortogonales
+
 ## EJERCICIO 7
 
-En el archivo pgc.txt se encuentran las mediciones de 252 personas. Se desea construir una fórmula que
-sea capaz de estimar el porcentaje de grasa corporal en función de algunas mediciones (circunferencia
-abdominal, circunferencia de cintura, de cuello, entre otras).
+En el archivo pgc.txt se encuentran las mediciones de 252 personas. Se desea construir una fórmula que sea capaz de estimar el porcentaje de grasa corporal en función de algunas mediciones (circunferencia abdominal, circunferencia de cintura, de cuello, entre otras).
 
 ```{r, mesagge = FALSE}
 setwd("~/ModelosLineales26/ENTREGA2")
@@ -40,8 +92,7 @@ data[] <- sapply(data, as.numeric)
 str(data)
 ```
 
-1\. Visualice la relación de cada una de las medidas corporales con respecto a la variable porc_grasa y
-estime las correlaciones.
+1\. Visualice la relación de cada una de las medidas corporales con respecto a la variable porc_grasa y estime las correlaciones.
 
 ```{r}
 data_long <- pivot_longer(data, cols = -porc_grasa)
@@ -55,7 +106,7 @@ ggplot(data_long, aes(x = value, y = porc_grasa)) +
 cor(data$porc_grasa, data[ , names(data) != "porc_grasa"])
 ```
 
-2. Estime la matriz de correlación de las mediciones corporales
+2.  Estime la matriz de correlación de las mediciones corporales
 
 ```{r}
 cor(data) #devuelve varianza y correlaciones de la variables
@@ -64,10 +115,9 @@ cor(data) #devuelve varianza y correlaciones de la variables
 ggcorrplot(cor(data))
 ```
 
-3.  **Describa con sus palabras las conclusiones que haya podido obtener a partir de los dos puntos
-    anteriores.**
+3.  **Describa con sus palabras las conclusiones que haya podido obtener a partir de los dos puntos anteriores.**
 
-4. Realice un conjunto de modelos de RLS (regresión lineal simple) que expliquen la relacion de cada medida corporal con respecto al porcentaje de grasa corporal.
+4.  Realice un conjunto de modelos de RLS (regresión lineal simple) que expliquen la relacion de cada medida corporal con respecto al porcentaje de grasa corporal.
 
 ```{r}
 
