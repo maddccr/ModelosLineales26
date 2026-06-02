@@ -60,5 +60,5 @@ nrow(na.omit(datos |> filter( Momento == "Preencarnerada") )) 57
 
 ```{r}
 #CORR ENTRE PESOOVEJA Y CCOVE CON GAINSENALA
-
+ 
 ```
