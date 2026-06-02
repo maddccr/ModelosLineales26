@@ -1,0 +1,64 @@
+---
+title: "ovejas"
+format: html
+editor: visual
+---
+
+## 
+
+```{r, warning =FALSE}
+library(readxl)
+library(tidyverse)
+
+
+
+datos <- read_excel("datosovejas.xlsx", sheet = "Datos hasta señalada", na = "." )
+str(datos)
+
+datos$Tiponac[datos$Tiponac == "3"] <- 2
+
+datos_preparto <- datos |> filter( Momento == "Preparto") 
+datos_preparto <- na.omit(datos_preparto)
+datos_preparto <- datos_preparto |> 
+  mutate(Edad = as.factor(Edad),
+         Partos = as.factor(Partos),
+         Pesove = as.numeric(Pesove),
+         CCove = as.numeric(CCove),
+         LOTE = as.factor(LOTE),
+         Tiponac = as.factor(Tiponac),
+         Potrepari = as.factor(Potrepari),
+         Sex = as.factor(Sex),
+         Gainseñal = as.numeric(Gainseñal),
+         Nodu = as.factor(Nodu),
+         Induru = as.factor(Induru),
+         Nodpez = as.factor(Nodpez),
+         Eco = as.factor(Eco),
+         Lagubre = as.factor(Lagubre),
+         Ancubre = as.factor(Ancubre),
+         Anchopez = as.factor(Anchopez),
+         Largopez = as.factor(Largopez),
+         Peznum = as.factor(Peznum),
+         Suspen = as.factor(Suspen),
+         Separ = as.factor(Separ),
+         Ubicpez = as.factor(Ubicpez),
+         Simet = as.factor(Simet) ) |> 
+select(-PadCord, -PN) 
+
+str(datos_preparto)
+
+
+#nrow(datos_preparto |> filter(if_any(everything(), ~ !is.na(.x))) )
+nrow(na.omit(datos_preparto)) 159 174 #yipiii 
+
+nrow(na.omit(datos))
+
+nrow(na.omit(datos |> filter( Momento == "Preencarnerada") )) 57
+
+
+#OJO NA AAAAAAAAAAAAAAAAAAAAAA
+```
+
+```{r}
+#CORR ENTRE PESOOVEJA Y CCOVE CON GAINSENALA
+
+```
