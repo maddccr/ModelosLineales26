@@ -10,6 +10,7 @@ editor: visual
 library(readxl)
 library(tidyverse)
 library(ggplot2)
+library(rcartocolor)
 ```
 
 ```{r, warning =FALSE}
@@ -48,8 +49,8 @@ datos_preparto <- datos_preparto |>
          Simet = as.factor(Simet) ) 
 
 str(datos_preparto)
-#detectamos que no hay nodulos en los pezones
 
+#Detectamos que no hay nodulos en los pezones
 datos_preparto <- datos_preparto |> select(-PadCord, -PN, -Nodpez, Indupez)
 
 
@@ -62,6 +63,31 @@ nrow(na.omit(datos |> filter( Momento == "Preencarnerada") )) 57
 
 which(datos_preparto$Indupez == 1) #hay uno solo
 datos_preparto$Indupez[datos_preparto$Indupez == 1] 
+```
+
+```{r}
+datos_preparto <- datos_preparto |> 
+  mutate(
+    Partos = fct_recode(Partos,"Multipara" = "M","Primipara" = "P"),
+    LOTE = fct_recode(LOTE,"Inseminación artificial" = "IA",
+                           "Repaso con carnero" = "R"),
+    Tiponac = fct_recode(Tiponac, "Simple" = "1","Múltiple" = "2"),
+    Sex = fct_recode(Sex,"Hembra" = "H","Macho" = "M"),
+    Nodu = fct_recode(Nodu, "Ausencia" = "0","Presencia" = "1"),
+    Induru = fct_recode(Induru,"Ausencia" = "0","Presencia" = "1"),
+    Eco = fct_recode(Eco,"Normal" = "0","Alteración" = "1"),
+    Peznum = fct_recode(Peznum, "Ausencia" = "0","Presencia" = "1"),
+    Suspen = fct_recode(Suspen,"Ancha" = "1",
+                               "Cuadrada" = "2",
+                               "Pendulada" = "3"),
+    Separ = fct_recode(Separ,"Marcada" = "1",
+                             "Moderada" = "2",
+                             "Sin" = "3"),
+    Ubicpez = fct_recode(Ubicpez, "Lateral" = "1",
+                                  "Vertical" = "2",
+                                  "Horizontal" = "3"),
+    Simet = fct_recode(Simet, "Simétrica" = "0", "No simétrica" = "1")
+  )
 ```
 
 ```{r}
@@ -187,6 +213,47 @@ datos_preparto |> ggplot() +
 #OJO DATOS NO HOMOGENEOS PREGUNTAR EL PARTES // SE PUEDEN PONDERAR O PENALIZAR LAS CATEGORIAS PARA BALANCEAR LOS DATOS 
 ```
 
+Relacion entre variables categoricas y la respuesta
+
 ```{r}
+cat_vars <- names(Filter(is.factor, datos_preparto))
+
+nombresbien <- c("Edad (cronología dentaria)", 
+                 "Número de partos",
+                 "Manejo reproductivo",
+                 "Tipo de nacimiento",
+                 "Potrero",
+                 "Sexo",
+                 "Nodulos en ubre",
+                 "Induración en ubre",
+                 "Nodulos en los pezones",
+                 "Alteraciones ecograficas",
+                 "Pezones supernumerarios",
+                 "Suspensión ubre",
+                 "Separación ubre",
+                 "Ubicación pezones",
+                 "Simiatría ubre"    )
+
+for(i in 1:length(cat_vars)) {
+   
+  g <- ggplot(datos_preparto, aes(x = .data[[cat_vars[i]]], 
+                             y = Gainseñal,
+                             fill = .data[[cat_vars[i]]] )) + 
+    geom_boxplot() +
+    ylab('Ganancia media de peso diario') +
+    xlab(nombresbien[i]) +
+    scale_fill_carto_d(palette = "SunsetDark", 
+                       type = "qualitative",
+                       name = nombresbien[i]) +
+    theme_minimal() +
+    theme(legend.position = "none",
+          axis.title.x = element_text(margin = margin(t = 20)),
+          axis.title.y = element_text(margin = margin(t = 20))) 
+  
+  print(g)
+}
+
+
+#POTRERO Y TIPONAC INTERACCION!!!
 
 ```
