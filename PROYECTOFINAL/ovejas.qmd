@@ -10,8 +10,9 @@ editor: visual
 library(readxl)
 library(tidyverse)
 library(ggplot2)
+```
 
-
+```{r, warning =FALSE}
 
 datos <- read_excel("datosovejas.xlsx", sheet = "Datos hasta señalada", na = "." )
 str(datos)
@@ -19,7 +20,11 @@ str(datos)
 datos$Tiponac[datos$Tiponac == "3"] <- 2
 
 datos_preparto <- datos |> filter( Momento == "Preparto") 
+
+#OJO CAPAZ NO ES LO MEJOR ELIMINAR DE UNA
 datos_preparto <- na.omit(datos_preparto)
+
+
 datos_preparto <- datos_preparto |> 
   mutate(Edad = as.factor(Edad),
          Partos = as.factor(Partos),
@@ -40,21 +45,23 @@ datos_preparto <- datos_preparto |>
          Suspen = as.factor(Suspen),
          Separ = as.factor(Separ),
          Ubicpez = as.factor(Ubicpez),
-         Simet = as.factor(Simet) ) |> 
-select(-PadCord, -PN) 
+         Simet = as.factor(Simet) ) 
 
 str(datos_preparto)
+#detectamos que no hay nodulos en los pezones
+
+datos_preparto <- datos_preparto |> select(-PadCord, -PN, -Nodpez, Indupez)
 
 
 #nrow(datos_preparto |> filter(if_any(everything(), ~ !is.na(.x))) )
-nrow(na.omit(datos_preparto)) 159 174 #yipiii 
+nrow(na.omit(datos_preparto)) #159 174 yipii 
 
 nrow(na.omit(datos))
 
 nrow(na.omit(datos |> filter( Momento == "Preencarnerada") )) 57
 
-
-#OJO NA AAAAAAAAAAAAAAAAAAAAAA
+which(datos_preparto$Indupez == 1) #hay uno solo
+datos_preparto$Indupez[datos_preparto$Indupez == 1] 
 ```
 
 ```{r}
@@ -125,12 +132,17 @@ datos_preparto |> ggplot() +
   labs(title = "Alteraciones ecográficas") +
   scale_fill_discrete(labels = c("0" = "Normal", 
                                  "1" = "Alteración"))
+
+
 #NODPEZ=0 PARA TODAS LAS OBSERVACIONES
-datos_preparto |> ggplot() +
-  geom_bar(aes(x=Nodpez))
-#INDURACION EN PEZONES CHEQUEAR CUANTAS TIENEN
-datos_preparto |> ggplot() +
-  geom_bar(aes(x=Indupez))
+#datos_preparto |> ggplot() +
+  #geom_bar(aes(x=Nodpez))
+
+
+
+#INDURACION EN PEZONES CHEQUEAR CUANTAS TIENEN SAQUE LA VARIABLE
+#datos_preparto |> ggplot() +
+  #geom_bar(aes(x=Indupez))
 
 #POR QUE LAS CATEGORÍAS SON AUSENCIA Y PRESENCIA?
 datos_preparto |> ggplot() +
@@ -169,4 +181,12 @@ datos_preparto |> ggplot() +
   labs(title = "Simetría ubre") +
   scale_fill_discrete(labels = c("0" = "Simétrica", 
                                  "1" = "No simétrica"))
+```
+
+```{r}
+#OJO DATOS NO HOMOGENEOS PREGUNTAR EL PARTES // SE PUEDEN PONDERAR O PENALIZAR LAS CATEGORIAS PARA BALANCEAR LOS DATOS 
+```
+
+```{r}
+
 ```

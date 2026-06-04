@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>entrega2</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="entrega2_files/libs/clipboard/clipboard.min.js"></script>
+<script src="entrega2_files/libs/quarto-html/quarto.js"></script>
+<script src="entrega2_files/libs/quarto-html/popper.min.js"></script>
+<script src="entrega2_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="entrega2_files/libs/quarto-html/anchor.min.js"></script>
+<link href="entrega2_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="entrega2_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="entrega2_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="entrega2_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="entrega2_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+<section id="segunda-entrega---práctico-2" class="level1">
+<h1>Segunda entrega - Práctico 2</h1>
+<section id="ejercicio-5" class="level2">
+<h2 class="anchored" data-anchor-id="ejercicio-5">EJERCICIO 5</h2>
+<p><strong>Suponga que en una aplicación económica donde se quiere modelar el ahorro de un conjunto de hogares en función de sus ingresos, el modelo correcto a aplicar es:</strong> <span class="math inline">\(ahorro_i = \beta_0 + \beta_1 \, ingreso_i + \epsilon_i\)</span> <strong>Pero usted, decide eliminar la constante del modelo debido a que sin ingresos es imposible ahorrar. Por ende, ajusta el siguiente modelo:</strong> <span class="math inline">\(ahorro_i = \beta_1^{*} \, ingreso_i + \epsilon_i^{*}\)</span></p>
+<p><strong>1. Demuestre que el estimador de mınimos cuadrados es:</strong> <span class="math inline">\(\hat{\beta}_1 = \frac{\sum_i ingreso_i \cdot ahorro_i}{\sum_i ingreso_i^2}\)</span></p>
+<p><span class="math inline">\(\hat{\beta}_{\text{MCO}} = (X^{\top} X)^{-1} X^{\top} Y\)</span></p>
+<p>Para el modelo reducido tenemos que <span class="math inline">\(x_i = ingreso_i\)</span> e <span class="math inline">\(y_i =ahorro_i\)</span></p>
+<p><span class="math inline">\(X= \begin{pmatrix}ingreso_1 \\ingreso_2 \\\vdots \\ingreso_n\end{pmatrix}\)</span> <span class="math inline">\(Y=\begin{pmatrix}ahorro_1 \\ahorro_2 \\\vdots \\ahorro_n\end{pmatrix}\)</span></p>
+<p><span class="math inline">\(X^{\top} X = (ingreso_1, ingreso_2, \ldots, ingreso_n)\begin{pmatrix} ingreso_1 \\ ingreso_2 \\ \vdots \\ ingreso_n\end{pmatrix}= \sum_{i=1}^n ingreso_i^2\)</span></p>
+<p><span class="math inline">\((X^{\top} X) ^{-1} = \left( \sum_{i=1}^n ingreso_i ^2 \right) ^{-1} = \frac{1}{\sum_{i=1}^n ingreso_i^2}\)</span></p>
+<p><span class="math inline">\(X^{\top} Y = (ingreso_1, ingreso_2, \ldots, ingreso_n)\begin{pmatrix}ahorro_1 \\ahorro_2 \\\vdots \\ahorro_n\end{pmatrix}= \sum_{i=1}^n ingreso_i \, ahorro_i\)</span></p>
+<p><span class="math inline">\(\Rightarrow \hat{\beta}_{\text{MCO}} = \hat{\beta^{*}}_{1} = \frac{\sum_{i=1}^n ingreso_i \, ahorro_i}{\sum_{i=1}^n ingreso_i^2}\)</span></p>
+<p><strong>2. Demuestre que (si el modelo correcto incluye la constante) este estimador es sesgado.</strong></p>
+<p>Siguiendo la ppt de la clase 6 (diapositiva 14) se define para <span class="math inline">\(Y = X_1 \beta_1 + X_2 \beta_2 + \epsilon\)</span></p>
+<p><span class="math inline">\(E\left(\hat{\beta}_1^{*}\right)= \beta_1 + (X_1^{\top} X_1)^{-1} X_1^{\top} X_2 \beta_2\)</span></p>
+<p>La esperanza de <span class="math inline">\(\beta_1\)</span> para el modelo reducido, omitiendo <span class="math inline">\(\beta_2 X_2\)</span></p>
+<p>En nuestro caso</p>
+<p><span class="math inline">\(Y=\begin{pmatrix}ahorro_1 \\ahorro_2 \\\vdots \\ahorro_n\end{pmatrix}\)</span> <span class="math inline">\(X_1= \begin{pmatrix}ingreso_1 \\ingreso_2 \\\vdots \\ingreso_n\end{pmatrix}\)</span></p>
+<p>y <span class="math inline">\(X_2 = \begin{pmatrix}1 \\1 \\\vdots \\1\end{pmatrix}\)</span> una constante omitida pero relevante con <span class="math inline">\(\beta_2 = \beta_0\)</span></p>
+<p><span class="math inline">\((X_1 ^{\top} X_1) ^{-1} = \frac{1}{\sum_{i=1}^n ingreso_i ^2}\)</span></p>
+<p><span class="math inline">\(X_1^{\top} X_2=(ingreso_1, ingreso_2, \ldots, ingreso_n)\begin{pmatrix}1 \\1 \\\vdots \\1\end{pmatrix}= \sum_{i=1}^n ingreso_i\)</span></p>
+<p><span class="math inline">\(E\left(\hat{\beta}_1^{*}\right)= \beta_1 + \frac{\sum_{i=1}^n ingreso_i}{\sum_{i=1}^n ingreso_i^2} \, \beta_0\)</span></p>
+<p>Asumimos que <span class="math inline">\(\beta_0 \neq 0\)</span></p>
+<p><span class="math inline">\(\Rightarrow\)</span> SESGADO</p>
+<p><strong>3. Encuentre una expresión para dicho sesgo.</strong></p>
+<p>(Notas Inferencia p.72) Definición 3.4.2.</p>
+<p>Para un estimador real <span class="math inline">\(T\)</span> de <span class="math inline">\(\tau(\theta)\)</span> , el sesgo de <span class="math inline">\(T\)</span> se define como <span class="math inline">\(B_{\theta}(T) = E_{\theta}(T) - \tau(\theta), \theta \in \Theta\)</span>.</p>
+<p>En nuestro caso, usando la definición tenemos que: <span class="math inline">\(B(\hat{\beta}_1^{*}) = E(\hat{\beta}_1 ^{ * } ) - \beta_1\)</span></p>
+<p>Sustituyendo:</p>
+<p><span class="math inline">\(B(\hat{\beta}_1^{*}) = \left( \beta_1 + \frac{\sum_{i=1}^n ingreso_i}{\sum_{i=1}^n ingreso_i^2} \, \beta_0 \right) - \beta_1 \Rightarrow B(\hat{\beta}_1^{*}) = \frac{\sum_{i=1}^n ingreso_i}{\sum_{i=1}^n ingreso_i^2} \, \beta_0\)</span></p>
+<p><strong>4. ¿Qué idea se le ocurre para solucionar el problema del sesgo y continuar trabajando con el modelo sin constante?</strong></p>
+<p>Centar las variables seria buena idea para eliminar el sesgo sin incluir explicitamente la constante. Al hacer esto, pasan a tener media 0, que implica que la variable explicativa es ortogonal a la constante. Graficamente veriamos que la recta ajustada pasa por el origen (0), preservando la pendiente.</p>
+<p>Sea <span class="math inline">\(\tilde{X_1}=X_1 - E(X_1)\)</span>. Queremos estudiar su ortogonalidad respecto a <span class="math inline">\(X_2\)</span></p>
+<p><span class="math inline">\(\tilde{X}_1 \perp X_2 \;\Longleftrightarrow\; \langle X_1, X_2 \rangle = 0\)</span></p>
+<p>Ademas sabemos que por propiedad la media es el punto de equilibrio. Entonces</p>
+<p><span class="math inline">\(\tilde{x}_i = x_i - \bar{x}\quad \Rightarrow \quad\sum_{i=1}^n \tilde{x}_i = 0\)</span></p>
+<p><span class="math inline">\(\langle \tilde{X_1}, X_2 \rangle = \tilde{X}_1^\top X_2 = (\tilde{ingreso}_1, \tilde{ingreso}_2, \ldots, \tilde{ingreso}_n)\begin{pmatrix}1 \\ 1 \\ \vdots \\ 1\end{pmatrix}= \sum_{i=1}^n \tilde{ingreso}_i = 0\)</span></p>
+<p>Entonces son ortogonales</p>
+</section>
+<section id="ejercicio-7" class="level2">
+<h2 class="anchored" data-anchor-id="ejercicio-7">EJERCICIO 7</h2>
+<p><strong>En el archivo pgc.txt se encuentran las mediciones de 252 personas. Se desea construir una fórmula que sea capaz de estimar el porcentaje de grasa corporal en función de algunas mediciones (circunferencia abdominal, circunferencia de cintura, de cuello, entre otras).</strong></p>
+<div class="cell" data-mesagge="false">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#cargo librerias</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.2     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+✔ purrr     1.0.4     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggcorrplot)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra) <span class="co">#no hace falta la verdad</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'kableExtra'
+
+The following object is masked from 'package:dplyr':
+
+    group_rows</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#otras librerias alternativas --&gt; GGally para usar ggpairs</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">"pgc.txt"</span>, <span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">dec =</span> <span class="st">","</span>) </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#guardo data organizada, fue medio un desastre al principio</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data) <span class="co">#ver la clase de las variables</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   252 obs. of  14 variables:
+ $ porc_grasa: num  12.6 6.9 24.6 10.9 27.8 20.6 19 12.8 5.1 12 ...
+ $ edad      : int  23 22 22 26 24 24 26 25 25 23 ...
+ $ peso      : num  70 78.6 69.9 83.8 83.6 95.4 82.1 79.8 86.6 89.9 ...
+ $ altura    : num  166 177 162 177 175 ...
+ $ cuello    : num  36.2 38.5 34 37.4 34.4 39 36.4 37.8 38.1 42.1 ...
+ $ pecho     : num  93.1 93.6 95.8 101.8 97.3 ...
+ $ abdomen   : num  85.2 83 87.9 86.4 100 94.4 90.7 88.5 82.5 88.6 ...
+ $ cadera    : num  94.5 98.7 99.2 101.2 101.9 ...
+ $ muslo     : num  59 58.7 59.6 60.1 63.2 66 58.4 60 62.9 63.1 ...
+ $ rodilla   : num  37.3 37.3 38.9 37.3 42.2 42 38.3 39.4 38.3 41.7 ...
+ $ tobillo   : num  21.9 23.4 24 22.8 24 25.6 22.9 23.2 23.8 25 ...
+ $ biceps    : num  32 30.5 28.8 32.4 32.2 35.7 31.9 30.5 35.9 35.6 ...
+ $ brazo     : num  27.4 28.9 25.2 29.4 27.7 30.6 27.8 29 31.1 30 ...
+ $ muneca    : num  17.1 18.2 16.6 18.2 17.7 18.8 17.7 18.8 18.2 19.2 ...</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>data[] <span class="ot">&lt;-</span> <span class="fu">sapply</span>(data, as.numeric) <span class="co">#lo paso a numericos</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>1. Visualice la relación de cada una de las medidas corporales con respecto a la variable porc_grasa y estime las correlaciones.</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>data_long <span class="ot">&lt;-</span> <span class="fu">pivot_longer</span>(data, <span class="at">cols =</span> <span class="sc">-</span>porc_grasa)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data_long, <span class="fu">aes</span>(<span class="at">x =</span> value, <span class="at">y =</span> porc_grasa)) <span class="sc">+</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"violet"</span>, <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">color =</span> <span class="st">"deeppink"</span>) <span class="sc">+</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>name, <span class="at">scales =</span> <span class="st">"free_x"</span>) <span class="sc">+</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="entrega2_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">cor</span>(data<span class="sc">$</span>porc_grasa, data[ , <span class="fu">names</span>(data) <span class="sc">!=</span> <span class="st">"porc_grasa"</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 8%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">edad</th>
+<th style="text-align: right;">peso</th>
+<th style="text-align: right;">altura</th>
+<th style="text-align: right;">cuello</th>
+<th style="text-align: right;">pecho</th>
+<th style="text-align: right;">abdomen</th>
+<th style="text-align: right;">cadera</th>
+<th style="text-align: right;">muslo</th>
+<th style="text-align: right;">rodilla</th>
+<th style="text-align: right;">tobillo</th>
+<th style="text-align: right;">biceps</th>
+<th style="text-align: right;">brazo</th>
+<th style="text-align: right;">muneca</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.2891735</td>
+<td style="text-align: right;">0.6132242</td>
+<td style="text-align: right;">-0.0224272</td>
+<td style="text-align: right;">0.4914889</td>
+<td style="text-align: right;">0.7028852</td>
+<td style="text-align: right;">0.8137062</td>
+<td style="text-align: right;">0.6256999</td>
+<td style="text-align: right;">0.5612844</td>
+<td style="text-align: right;">0.5077859</td>
+<td style="text-align: right;">0.2667826</td>
+<td style="text-align: right;">0.4930309</td>
+<td style="text-align: right;">0.3632774</td>
+<td style="text-align: right;">0.3475728</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#redundate con la matriz de correlacion</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol start="2" type="1">
+<li><strong>Estime la matriz de correlación de las mediciones corporales</strong></li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>mdecor <span class="ot">&lt;-</span> <span class="fu">cor</span>(data) <span class="co">#devuelve varianza y correlaciones de la variables, es decir la matriz</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(mdecor)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">porc_grasa</th>
+<th style="text-align: right;">edad</th>
+<th style="text-align: right;">peso</th>
+<th style="text-align: right;">altura</th>
+<th style="text-align: right;">cuello</th>
+<th style="text-align: right;">pecho</th>
+<th style="text-align: right;">abdomen</th>
+<th style="text-align: right;">cadera</th>
+<th style="text-align: right;">muslo</th>
+<th style="text-align: right;">rodilla</th>
+<th style="text-align: right;">tobillo</th>
+<th style="text-align: right;">biceps</th>
+<th style="text-align: right;">brazo</th>
+<th style="text-align: right;">muneca</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">porc_grasa</td>
+<td style="text-align: right;">1.0000000</td>
+<td style="text-align: right;">0.2891735</td>
+<td style="text-align: right;">0.6132242</td>
+<td style="text-align: right;">-0.0224272</td>
+<td style="text-align: right;">0.4914889</td>
+<td style="text-align: right;">0.7028852</td>
+<td style="text-align: right;">0.8137062</td>
+<td style="text-align: right;">0.6256999</td>
+<td style="text-align: right;">0.5612844</td>
+<td style="text-align: right;">0.5077859</td>
+<td style="text-align: right;">0.2667826</td>
+<td style="text-align: right;">0.4930309</td>
+<td style="text-align: right;">0.3632774</td>
+<td style="text-align: right;">0.3475728</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">edad</td>
+<td style="text-align: right;">0.2891735</td>
+<td style="text-align: right;">1.0000000</td>
+<td style="text-align: right;">-0.0126788</td>
+<td style="text-align: right;">-0.2455175</td>
+<td style="text-align: right;">0.1135052</td>
+<td style="text-align: right;">0.1764497</td>
+<td style="text-align: right;">0.2304094</td>
+<td style="text-align: right;">-0.0503321</td>
+<td style="text-align: right;">-0.2000958</td>
+<td style="text-align: right;">0.0175157</td>
+<td style="text-align: right;">-0.1050581</td>
+<td style="text-align: right;">-0.0411621</td>
+<td style="text-align: right;">-0.0850556</td>
+<td style="text-align: right;">0.2135306</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">peso</td>
+<td style="text-align: right;">0.6132242</td>
+<td style="text-align: right;">-0.0126788</td>
+<td style="text-align: right;">1.0000000</td>
+<td style="text-align: right;">0.4879517</td>
+<td style="text-align: right;">0.8307019</td>
+<td style="text-align: right;">0.8941979</td>
+<td style="text-align: right;">0.8879807</td>
+<td style="text-align: right;">0.9408611</td>
+<td style="text-align: right;">0.8686880</td>
+<td style="text-align: right;">0.8531476</td>
+<td style="text-align: right;">0.6137599</td>
+<td style="text-align: right;">0.8005109</td>
+<td style="text-align: right;">0.6301386</td>
+<td style="text-align: right;">0.7297720</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">altura</td>
+<td style="text-align: right;">-0.0224272</td>
+<td style="text-align: right;">-0.2455175</td>
+<td style="text-align: right;">0.4879517</td>
+<td style="text-align: right;">1.0000000</td>
+<td style="text-align: right;">0.3202702</td>
+<td style="text-align: right;">0.2274898</td>
+<td style="text-align: right;">0.1910599</td>
+<td style="text-align: right;">0.3748292</td>
+<td style="text-align: right;">0.3412596</td>
+<td style="text-align: right;">0.5024881</td>
+<td style="text-align: right;">0.3934893</td>
+<td style="text-align: right;">0.3189629</td>
+<td style="text-align: right;">0.3216992</td>
+<td style="text-align: right;">0.3965094</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">cuello</td>
+<td style="text-align: right;">0.4914889</td>
+<td style="text-align: right;">0.1135052</td>
+<td style="text-align: right;">0.8307019</td>
+<td style="text-align: right;">0.3202702</td>
+<td style="text-align: right;">1.0000000</td>
+<td style="text-align: right;">0.7848350</td>
+<td style="text-align: right;">0.7540774</td>
+<td style="text-align: right;">0.7349579</td>
+<td style="text-align: right;">0.6956973</td>
+<td style="text-align: right;">0.6724050</td>
+<td style="text-align: right;">0.4778924</td>
+<td style="text-align: right;">0.7311459</td>
+<td style="text-align: right;">0.6236603</td>
+<td style="text-align: right;">0.7448264</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">pecho</td>
+<td style="text-align: right;">0.7028852</td>
+<td style="text-align: right;">0.1764497</td>
+<td style="text-align: right;">0.8941979</td>
+<td style="text-align: right;">0.2274898</td>
+<td style="text-align: right;">0.7848350</td>
+<td style="text-align: right;">1.0000000</td>
+<td style="text-align: right;">0.9158277</td>
+<td style="text-align: right;">0.8294199</td>
+<td style="text-align: right;">0.7298586</td>
+<td style="text-align: right;">0.7194964</td>
+<td style="text-align: right;">0.4829879</td>
+<td style="text-align: right;">0.7279075</td>
+<td style="text-align: right;">0.5801727</td>
+<td style="text-align: right;">0.6601623</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">abdomen</td>
+<td style="text-align: right;">0.8137062</td>
+<td style="text-align: right;">0.2304094</td>
+<td style="text-align: right;">0.8879807</td>
+<td style="text-align: right;">0.1910599</td>
+<td style="text-align: right;">0.7540774</td>
+<td style="text-align: right;">0.9158277</td>
+<td style="text-align: right;">1.0000000</td>
+<td style="text-align: right;">0.8740662</td>
+<td style="text-align: right;">0.7666239</td>
+<td style="text-align: right;">0.7371789</td>
+<td style="text-align: right;">0.4532227</td>
+<td style="text-align: right;">0.6849827</td>
+<td style="text-align: right;">0.5033161</td>
+<td style="text-align: right;">0.6198324</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">cadera</td>
+<td style="text-align: right;">0.6256999</td>
+<td style="text-align: right;">-0.0503321</td>
+<td style="text-align: right;">0.9408611</td>
+<td style="text-align: right;">0.3748292</td>
+<td style="text-align: right;">0.7349579</td>
+<td style="text-align: right;">0.8294199</td>
+<td style="text-align: right;">0.8740662</td>
+<td style="text-align: right;">1.0000000</td>
+<td style="text-align: right;">0.8964098</td>
+<td style="text-align: right;">0.8234726</td>
+<td style="text-align: right;">0.5583868</td>
+<td style="text-align: right;">0.7392725</td>
+<td style="text-align: right;">0.5450141</td>
+<td style="text-align: right;">0.6300895</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">muslo</td>
+<td style="text-align: right;">0.5612844</td>
+<td style="text-align: right;">-0.2000958</td>
+<td style="text-align: right;">0.8686880</td>
+<td style="text-align: right;">0.3412596</td>
+<td style="text-align: right;">0.6956973</td>
+<td style="text-align: right;">0.7298586</td>
+<td style="text-align: right;">0.7666239</td>
+<td style="text-align: right;">0.8964098</td>
+<td style="text-align: right;">1.0000000</td>
+<td style="text-align: right;">0.7991703</td>
+<td style="text-align: right;">0.5397971</td>
+<td style="text-align: right;">0.7614774</td>
+<td style="text-align: right;">0.5668422</td>
+<td style="text-align: right;">0.5586848</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">rodilla</td>
+<td style="text-align: right;">0.5077859</td>
+<td style="text-align: right;">0.0175157</td>
+<td style="text-align: right;">0.8531476</td>
+<td style="text-align: right;">0.5024881</td>
+<td style="text-align: right;">0.6724050</td>
+<td style="text-align: right;">0.7194964</td>
+<td style="text-align: right;">0.7371789</td>
+<td style="text-align: right;">0.8234726</td>
+<td style="text-align: right;">0.7991703</td>
+<td style="text-align: right;">1.0000000</td>
+<td style="text-align: right;">0.6116082</td>
+<td style="text-align: right;">0.6787088</td>
+<td style="text-align: right;">0.5558982</td>
+<td style="text-align: right;">0.6645073</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tobillo</td>
+<td style="text-align: right;">0.2667826</td>
+<td style="text-align: right;">-0.1050581</td>
+<td style="text-align: right;">0.6137599</td>
+<td style="text-align: right;">0.3934893</td>
+<td style="text-align: right;">0.4778924</td>
+<td style="text-align: right;">0.4829879</td>
+<td style="text-align: right;">0.4532227</td>
+<td style="text-align: right;">0.5583868</td>
+<td style="text-align: right;">0.5397971</td>
+<td style="text-align: right;">0.6116082</td>
+<td style="text-align: right;">1.0000000</td>
+<td style="text-align: right;">0.4848545</td>
+<td style="text-align: right;">0.4190500</td>
+<td style="text-align: right;">0.5661946</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">biceps</td>
+<td style="text-align: right;">0.4930309</td>
+<td style="text-align: right;">-0.0411621</td>
+<td style="text-align: right;">0.8005109</td>
+<td style="text-align: right;">0.3189629</td>
+<td style="text-align: right;">0.7311459</td>
+<td style="text-align: right;">0.7279075</td>
+<td style="text-align: right;">0.6849827</td>
+<td style="text-align: right;">0.7392725</td>
+<td style="text-align: right;">0.7614774</td>
+<td style="text-align: right;">0.6787088</td>
+<td style="text-align: right;">0.4848545</td>
+<td style="text-align: right;">1.0000000</td>
+<td style="text-align: right;">0.6782551</td>
+<td style="text-align: right;">0.6321264</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">brazo</td>
+<td style="text-align: right;">0.3632774</td>
+<td style="text-align: right;">-0.0850556</td>
+<td style="text-align: right;">0.6301386</td>
+<td style="text-align: right;">0.3216992</td>
+<td style="text-align: right;">0.6236603</td>
+<td style="text-align: right;">0.5801727</td>
+<td style="text-align: right;">0.5033161</td>
+<td style="text-align: right;">0.5450141</td>
+<td style="text-align: right;">0.5668422</td>
+<td style="text-align: right;">0.5558982</td>
+<td style="text-align: right;">0.4190500</td>
+<td style="text-align: right;">0.6782551</td>
+<td style="text-align: right;">1.0000000</td>
+<td style="text-align: right;">0.5855883</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">muneca</td>
+<td style="text-align: right;">0.3475728</td>
+<td style="text-align: right;">0.2135306</td>
+<td style="text-align: right;">0.7297720</td>
+<td style="text-align: right;">0.3965094</td>
+<td style="text-align: right;">0.7448264</td>
+<td style="text-align: right;">0.6601623</td>
+<td style="text-align: right;">0.6198324</td>
+<td style="text-align: right;">0.6300895</td>
+<td style="text-align: right;">0.5586848</td>
+<td style="text-align: right;">0.6645073</td>
+<td style="text-align: right;">0.5661946</td>
+<td style="text-align: right;">0.6321264</td>
+<td style="text-align: right;">0.5855883</td>
+<td style="text-align: right;">1.0000000</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#visualizar</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggcorrplot</span>(<span class="fu">cor</span>(data)) <span class="co">#mapa de calor de matriz de correlacion</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="entrega2_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<ol start="3" type="1">
+<li><strong>Describa con sus palabras las conclusiones que haya podido obtener a partir de los dos puntos anteriores.</strong></li>
+</ol>
+<p>En el gráfico de dispersión se puede observar una relación positiva entre porc_grasa y la mayoría de las variables, aunque en algunos casos más marcado que otros. Por ejemplo, se observa que la variable abdomen y cadera estan fuertemente relacionadas, presentando (en la recta ajustado por ggplot con el método lm, linear model) una pendiente mayor respecto a altura y edad. En estas últimas dos variables se observa una pendiente casi nula.</p>
+<p>En el mapa de calor de la matriz de correlación se corrobora esta afirmación. Altura y edad tienen un coeficiente de correlación respecto a porcentaje grasa en un color mas intenso cercano a 1, mientras que la altura por ejemplo es muy parecido a blanco (0). Los valores exactos los obtenemos en la matriz de correlación, los cuales sustentan las ideas de los gráficos. Abdomen tiene una correlación con el porcentaje de grasa de un 0.8, cadera 0.6. , y edad 0.28. Por otro lado, altura -0.02.</p>
+<p>Se presencia el vínculo entre la pendiente de la recta de RLS y el coeficiente de correlación lineal, permitiendo determinar fuerza y sentido de la relación y comparten el mismo signo. No obstante, el segundo esta normalizado entre -1 y 1, mientras que la pendiente depende de las unidades de medida</p>
+<ol start="4" type="1">
+<li><strong>Realice un conjunto de modelos de RLS (regresión lineal simple) que expliquen la relacion de cada medida corporal con respecto al porcentaje de grasa corporal. ¿Qué observa?</strong></li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>explicativas <span class="ot">&lt;-</span> <span class="fu">names</span>(data)[<span class="fu">names</span>(data) <span class="sc">!=</span> <span class="st">"porc_grasa"</span>]</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co">#sacar los nombres de la variables explicativas</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>modelitos <span class="ot">&lt;-</span> <span class="fu">lapply</span>(explicativas, </span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">function</span>(x){ <span class="co">#ajustar modelo para cada una</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">lm</span>(<span class="fu">as.formula</span>(<span class="fu">paste</span>(<span class="st">"porc_grasa ~"</span>, x)), <span class="at">data =</span> data)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>      })</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#ahora queremos ver la info/summary de cada uno</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>resumencitos <span class="ot">&lt;-</span> <span class="fu">lapply</span>(modelitos, summary)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(resumencitos) <span class="ot">&lt;-</span> explicativas</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>resumencitos</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$edad
+
+Call:
+lm(formula = as.formula(paste("porc_grasa ~", x)), data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-18.0697  -5.7025   0.2846   4.8301  25.0739 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) 10.95546    1.73576   6.312 1.25e-09 ***
+edad         0.17786    0.03724   4.776 3.04e-06 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 7.435 on 250 degrees of freedom
+Multiple R-squared:  0.08362,   Adjusted R-squared:  0.07996 
+F-statistic: 22.81 on 1 and 250 DF,  p-value: 3.045e-06
+
+
+$peso
+
+Call:
+lm(formula = as.formula(paste("porc_grasa ~", x)), data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-16.4422  -4.3170   0.0853   4.5478  19.6943 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -10.00108    2.38912  -4.186 3.93e-05 ***
+peso          0.35656    0.02905  12.275  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 6.135 on 250 degrees of freedom
+Multiple R-squared:  0.376, Adjusted R-squared:  0.3735 
+F-statistic: 150.7 on 1 and 250 DF,  p-value: &lt; 2.2e-16
+
+
+$altura
+
+Call:
+lm(formula = as.formula(paste("porc_grasa ~", x)), data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-19.0927  -6.0518   0.2569   5.6996  25.7407 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)  
+(Intercept) 23.62475   13.22116   1.787   0.0752 .
+altura      -0.02720    0.07669  -0.355   0.7231  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 7.764 on 250 degrees of freedom
+Multiple R-squared:  0.000503,  Adjusted R-squared:  -0.003495 
+F-statistic: 0.1258 on 1 and 250 DF,  p-value: 0.7231
+
+
+$cuello
+
+Call:
+lm(formula = as.formula(paste("porc_grasa ~", x)), data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-14.0076  -4.9450  -0.2405   5.0321  21.1344 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -40.5985     6.6857  -6.072 4.66e-09 ***
+cuello        1.5671     0.1756   8.923  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 6.764 on 250 degrees of freedom
+Multiple R-squared:  0.2416,    Adjusted R-squared:  0.2385 
+F-statistic: 79.62 on 1 and 250 DF,  p-value: &lt; 2.2e-16
+
+
+$pecho
+
+Call:
+lm(formula = as.formula(paste("porc_grasa ~", x)), data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-13.8875  -3.8211  -0.2752   3.4950  13.8989 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -46.21636    4.18460  -11.04   &lt;2e-16 ***
+pecho         0.64622    0.04136   15.62   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 5.524 on 250 degrees of freedom
+Multiple R-squared:  0.494, Adjusted R-squared:  0.492 
+F-statistic: 244.1 on 1 and 250 DF,  p-value: &lt; 2.2e-16
+
+
+$abdomen
+
+Call:
+lm(formula = as.formula(paste("porc_grasa ~", x)), data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-17.6257  -3.4672   0.0111   3.1415  11.9754 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -35.19661    2.46229  -14.29   &lt;2e-16 ***
+abdomen       0.58489    0.02643   22.13   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 4.514 on 250 degrees of freedom
+Multiple R-squared:  0.6621,    Adjusted R-squared:  0.6608 
+F-statistic: 489.9 on 1 and 250 DF,  p-value: &lt; 2.2e-16
+
+
+$cadera
+
+Call:
+lm(formula = as.formula(paste("porc_grasa ~", x)), data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-17.4935  -3.6928  -0.0198   4.2639  17.4321 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -48.69205    5.34621  -9.108   &lt;2e-16 ***
+cadera        0.67695    0.05338  12.683   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 6.058 on 250 degrees of freedom
+Multiple R-squared:  0.3915,    Adjusted R-squared:  0.3891 
+F-statistic: 160.8 on 1 and 250 DF,  p-value: &lt; 2.2e-16
+
+
+$muslo
+
+Call:
+lm(formula = as.formula(paste("porc_grasa ~", x)), data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-16.7339  -4.4098  -0.0762   4.2169  23.5976 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -30.28895    4.60860  -6.572 2.86e-10 ***
+muslo         0.82866    0.07728  10.723  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 6.428 on 250 degrees of freedom
+Multiple R-squared:  0.315, Adjusted R-squared:  0.3123 
+F-statistic:   115 on 1 and 250 DF,  p-value: &lt; 2.2e-16
+
+
+$rodilla
+
+Call:
+lm(formula = as.formula(paste("porc_grasa ~", x)), data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-13.9387  -4.3279  -0.1167   3.8454  28.9202 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -44.0365     6.7703  -6.504 4.22e-10 ***
+rodilla       1.6319     0.1751   9.320  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 6.691 on 250 degrees of freedom
+Multiple R-squared:  0.2578,    Adjusted R-squared:  0.2549 
+F-statistic: 86.86 on 1 and 250 DF,  p-value: &lt; 2.2e-16
+
+
+$tobillo
+
+Call:
+lm(formula = as.formula(paste("porc_grasa ~", x)), data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-19.8117  -5.4701  -0.0596   5.2249  25.5544 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  -9.2467     6.4569  -1.432    0.153    
+tobillo       1.2200     0.2787   4.377 1.77e-05 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 7.485 on 250 degrees of freedom
+Multiple R-squared:  0.07117,   Adjusted R-squared:  0.06746 
+F-statistic: 19.16 on 1 and 250 DF,  p-value: 1.77e-05
+
+
+$biceps
+
+Call:
+lm(formula = as.formula(paste("porc_grasa ~", x)), data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-19.7141  -5.1252  -0.0091   4.6983  23.0923 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -21.8820     4.5756  -4.782 2.96e-06 ***
+biceps        1.2648     0.1412   8.960  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 6.757 on 250 degrees of freedom
+Multiple R-squared:  0.2431,    Adjusted R-squared:  0.2401 
+F-statistic: 80.29 on 1 and 250 DF,  p-value: &lt; 2.2e-16
+
+
+$brazo
+
+Call:
+lm(formula = as.formula(paste("porc_grasa ~", x)), data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-17.2331  -5.2523  -0.3068   5.2087  25.5538 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  -21.003      6.495  -3.234  0.00139 ** 
+brazo          1.393      0.226   6.165 2.81e-09 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 7.236 on 250 degrees of freedom
+Multiple R-squared:  0.132, Adjusted R-squared:  0.1285 
+F-statistic: 38.01 on 1 and 250 DF,  p-value: 2.808e-09
+
+
+$muneca
+
+Call:
+lm(formula = as.formula(paste("porc_grasa ~", x)), data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-14.8183  -5.5840   0.1231   5.0703  25.6703 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -33.6660     8.9870  -3.746 0.000223 ***
+muneca        2.8856     0.4923   5.861 1.45e-08 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 7.282 on 250 degrees of freedom
+Multiple R-squared:  0.1208,    Adjusted R-squared:  0.1173 
+F-statistic: 34.35 on 1 and 250 DF,  p-value: 1.446e-08</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#summary(lm(porc_grasa ~ edad, data = data))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Todas las variables salvo altura presentan coeficientes (<span class="math inline">\(\beta\)</span>) positivo, indicando que individualmente aumentos en esas medidas corporales se asocian a un mayor porcentaje de grasa.&nbsp;Obervando los p-valores de las pruebas de significación individual todas son por separado altamente significativas (***), con alpha bajo, salvo altura (.) para la cual para un alpha = 0.1 no hay evidencia suficiente para no rechazar que sea cero. Esta significación alta individual para el resto de variables puede deberse a que por la alta correlación entre variables, como se puede visualizar en la matriz y el corplot, estan explicando la misma variación.</p>
+<p>A partir del <span class="math inline">\(R^2\)</span> se observa que algunas variables muestran una mayor capacidad explicativa, siendo mejores predictores a nivel indidual. Por ejemplo, abdomen 0.66, pecho 0.49 y cadera 0.39.</p>
+<p>5. <strong>Ajuste la siguiente serie de modelos:</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#modelos anidados</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(porc_grasa <span class="sc">~</span> abdomen, <span class="at">data =</span> data)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">update</span>(m1, . <span class="sc">~</span> . <span class="sc">+</span> cadera)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>m3 <span class="ot">&lt;-</span> <span class="fu">update</span>(m2, . <span class="sc">~</span> . <span class="sc">+</span> cuello)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>m4 <span class="ot">&lt;-</span> <span class="fu">update</span>(m3, . <span class="sc">~</span> . <span class="sc">+</span> muneca)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>modelos <span class="ot">&lt;-</span> <span class="fu">list</span>(m1, m2, m3, m4)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>resumen <span class="ot">&lt;-</span> <span class="fu">lapply</span>(modelos, summary)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(resumen) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"m1"</span>, <span class="st">"m2"</span>, <span class="st">"m3"</span>, <span class="st">"m4"</span>)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co">#resumen$m1$sigma</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">#extra comparar modelos con anova</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(m1, m2, m3, m4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>A partir de las estimaciones de estos modelos:</strong> -Compare la evolución del <span class="math inline">\(R^2\)</span>. -Compare la evolución de la estimación de <span class="math inline">\(\sigma^2\)</span>. -Compare la evolución del coeficiente asociado a la circunferencia abdominal.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>tabla <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Modelo =</span> <span class="fu">c</span>(<span class="st">"m1"</span>, <span class="st">"m2"</span>, <span class="st">"m3"</span>, <span class="st">"m4"</span>),</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">R2 =</span> <span class="fu">sapply</span>(modelos, <span class="cf">function</span>(x) <span class="fu">summary</span>(x)<span class="sc">$</span>r.squared),</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma2 =</span> <span class="fu">sapply</span>(modelos, <span class="cf">function</span>(x) <span class="fu">summary</span>(x)<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span>),</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">coef_abdom =</span> <span class="fu">sapply</span>(modelos, <span class="cf">function</span>(x) <span class="fu">coef</span>(x)[<span class="st">"abdomen"</span>])</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(tabla) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Modelo"</span>, <span class="st">"R²"</span>, <span class="st">"σ²"</span>, <span class="st">"Coef. Abdomen"</span>)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(tabla)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Modelo</th>
+<th style="text-align: right;">R²</th>
+<th style="text-align: right;">σ²</th>
+<th style="text-align: right;">Coef. Abdomen</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">m1</td>
+<td style="text-align: right;">0.6621178</td>
+<td style="text-align: right;">20.37972</td>
+<td style="text-align: right;">0.5848905</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">m2</td>
+<td style="text-align: right;">0.6931164</td>
+<td style="text-align: right;">18.58435</td>
+<td style="text-align: right;">0.8125882</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">m3</td>
+<td style="text-align: right;">0.7151147</td>
+<td style="text-align: right;">17.32173</td>
+<td style="text-align: right;">0.8916631</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">m4</td>
+<td style="text-align: right;">0.7255087</td>
+<td style="text-align: right;">16.75732</td>
+<td style="text-align: right;">0.8920214</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#con kable extra</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(tabla, <span class="at">caption =</span> <span class="st">"Comparación de modelos"</span>, <span class="at">align =</span> <span class="st">"c"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="st">"center"</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"bordered"</span>, <span class="st">"hover"</span>)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">column_spec</span>(<span class="dv">1</span>, <span class="at">bold =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">row_spec</span>(<span class="dv">0</span>, <span class="at">bold =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>A partir de la tabla se observa que el R cuadrado aumenta monotonamente al aumentar la cantidad de variables (por lo que no es un buen indicador para comparar modelos de distinto tamaño) no obstante, el aumento entre los últimos modelos no es muy alto. Para el sigma cuadrado se presentó un comportamiento contrario, en este caso disminuyendo al aumentar la cantidad de variables. Para el coeficiente de la variable abdomen, aumenta considerablemente entre m1 y m2 (puede deberse a la correlación entre abdomen y cadera) y luego empieza a estabilizarse, para el m4 la mejora es mínima. La variable abdomen pararece ser el predictor más fuerte, explicando en el modelo invidual un 66% de la variabilidad de Y, al sumarse las variables de m2 la mejora del modelo es notable y en m3 moderada.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
