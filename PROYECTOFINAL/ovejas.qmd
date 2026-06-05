@@ -135,14 +135,6 @@ ggplot(datos_preparto, aes(x = Gainseñal)) +
 ```
 
 ```{r}
-#Boxplot
-ggplot(datos_preparto, aes(y = Gainseñal)) +
-  geom_boxplot(fill = "deeppink3") +
-  theme_minimal() +
-  ylab("Ganancia media de peso diario")
-```
-
-```{r}
 datos_preparto |>
   summarise(
     Media = mean(Gainseñal),
