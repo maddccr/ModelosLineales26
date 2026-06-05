@@ -121,6 +121,42 @@ nombresbien <- c("Edad (cronología dentaria)",
                  "Simetría ubre"    )
 ```
 
+## Analisis Univariado
+
+### Variable Respuesta: Ganancia media de peso diario
+
+```{r}
+#Densidad
+ggplot(datos_preparto, aes(x = Gainseñal)) +
+  geom_density(fill = "deeppink3", alpha = 0.4) +
+  theme_minimal() +
+  labs(x = "Ganancia media de peso diario",
+       y = "Densidad")
+```
+
+```{r}
+#Boxplot
+ggplot(datos_preparto, aes(y = Gainseñal)) +
+  geom_boxplot(fill = "deeppink3") +
+  theme_minimal() +
+  ylab("Ganancia media de peso diario")
+```
+
+```{r}
+datos_preparto |>
+  summarise(
+    Media = mean(Gainseñal),
+    Mediana = median(Gainseñal),
+    Desvio = sd(Gainseñal),
+    Minimo = min(Gainseñal),
+    Maximo = max(Gainseñal)
+  )
+```
+
+### Variables Numéricas
+
+ari
+
 ```{r}
 #CORRELACION ENTRE PESOOVEJA, CCOVE, medidas, CON GAINSENAL
 
