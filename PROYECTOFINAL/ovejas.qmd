@@ -13,18 +13,34 @@ library(ggplot2)
 library(rcartocolor)
 ```
 
-```{r, warning =FALSE}
+Cargamos datos
+
+```{r}
 
 datos <- read_excel("datosovejas.xlsx", sheet = "Datos hasta señalada", na = "." )
 str(datos)
 
-datos$Tiponac[datos$Tiponac == "3"] <- 2
+datos$Tiponac[datos$Tiponac == "3"] <- 2 #recodificacion
 
-datos_preparto <- datos |> filter( Momento == "Preparto") 
+datos_preparto <- datos |> filter( Momento == "Preparto") #momento elegido para el primer analisis
 
-#OJO CAPAZ NO ES LO MEJOR ELIMINAR DE UNA
+```
+
+Analisis de datos faltantes
+
+```{r}
+nrow(na.omit(datos_preparto)) #159 174 yipii 
+
+nrow(na.omit(datos))
+
+nrow(na.omit(datos |> filter( Momento == "Preencarnerada") )) #57
+
 datos_preparto <- na.omit(datos_preparto)
+```
 
+Recodificacion de las variables
+
+```{r, warning =FALSE}
 
 datos_preparto <- datos_preparto |> 
   mutate(Edad = as.factor(Edad),
@@ -51,18 +67,13 @@ datos_preparto <- datos_preparto |>
 str(datos_preparto)
 
 #Detectamos que no hay nodulos en los pezones
-datos_preparto <- datos_preparto |> select(-PadCord, -PN, -Nodpez, Indupez)
+which(datos_preparto$Indupez == 1) #hay uno solo
+datos_preparto$Indupez[datos_preparto$Indupez == 1] 
+
+datos_preparto <- datos_preparto |> select(-PadCord, -PN, -Nodpez, -Indupez)
 
 
 #nrow(datos_preparto |> filter(if_any(everything(), ~ !is.na(.x))) )
-nrow(na.omit(datos_preparto)) #159 174 yipii 
-
-nrow(na.omit(datos))
-
-nrow(na.omit(datos |> filter( Momento == "Preencarnerada") )) 57
-
-which(datos_preparto$Indupez == 1) #hay uno solo
-datos_preparto$Indupez[datos_preparto$Indupez == 1] 
 ```
 
 ```{r}
@@ -88,6 +99,26 @@ datos_preparto <- datos_preparto |>
                                   "Horizontal" = "3"),
     Simet = fct_recode(Simet, "Simétrica" = "0", "No simétrica" = "1")
   )
+```
+
+```{r}
+#Para graficar variables categoricas
+cat_vars <- names(Filter(is.factor, datos_preparto))
+
+nombresbien <- c("Edad (cronología dentaria)", 
+                 "Número de partos",
+                 "Manejo reproductivo",
+                 "Tipo de nacimiento",
+                 "Potrero",
+                 "Sexo",
+                 "Nodulos en ubre",
+                 "Induración en ubre",
+                 "Alteraciones ecograficas",
+                 "Pezones supernumerarios",
+                 "Suspensión ubre",
+                 "Separación ubre",
+                 "Ubicación pezones",
+                 "Simiatría ubre"    )
 ```
 
 ```{r}
@@ -209,30 +240,11 @@ datos_preparto |> ggplot() +
                                  "1" = "No simétrica"))
 ```
 
-```{r}
-#OJO DATOS NO HOMOGENEOS PREGUNTAR EL PARTES // SE PUEDEN PONDERAR O PENALIZAR LAS CATEGORIAS PARA BALANCEAR LOS DATOS 
-```
+**#OJO DATOS NO HOMOGENEOS PREGUNTAR EL PARTES // SE PUEDEN PONDERAR O PENALIZAR LAS CATEGORIAS PARA BALANCEAR LOS DATOS**
 
 Relacion entre variables categoricas y la respuesta
 
 ```{r}
-cat_vars <- names(Filter(is.factor, datos_preparto))
-
-nombresbien <- c("Edad (cronología dentaria)", 
-                 "Número de partos",
-                 "Manejo reproductivo",
-                 "Tipo de nacimiento",
-                 "Potrero",
-                 "Sexo",
-                 "Nodulos en ubre",
-                 "Induración en ubre",
-                 "Nodulos en los pezones",
-                 "Alteraciones ecograficas",
-                 "Pezones supernumerarios",
-                 "Suspensión ubre",
-                 "Separación ubre",
-                 "Ubicación pezones",
-                 "Simiatría ubre"    )
 
 for(i in 1:length(cat_vars)) {
    
@@ -254,6 +266,12 @@ for(i in 1:length(cat_vars)) {
 }
 
 
-#POTRERO Y TIPONAC INTERACCION!!!
+
 
 ```
+
+VER INTERACCIONES
+
+#POTRERO Y TIPONAC INTERACCION!!!
+
+#EDAD Y CONDICION CORPORAL
