@@ -11,14 +11,14 @@ library(readxl)
 library(tidyverse)
 library(ggplot2)
 library(rcartocolor)
+library(ggcorrplot)
 ```
 
 Cargamos datos
 
 ```{r}
-
 datos <- read_excel("datosoveja.xlsx", sheet = "Datos hasta señalada", na = "." )
-str(datos)
+#str(datos)
 
 datos$Tiponac[datos$Tiponac == "3"] <- 2 #recodificacion
 
@@ -64,13 +64,14 @@ datos_preparto <- datos_preparto |>
          Ubicpez = as.factor(Ubicpez),
          Simet = as.factor(Simet) ) 
 
-str(datos_preparto)
+#str(datos_preparto)
 
 #Detectamos que no hay nodulos en los pezones
 which(datos_preparto$Indupez == 1) #hay uno solo
 datos_preparto$Indupez[datos_preparto$Indupez == 1] 
 
 datos_preparto <- datos_preparto |> select(-PadCord, -PN, -Nodpez, -Indupez)
+
 
 
 #nrow(datos_preparto |> filter(if_any(everything(), ~ !is.na(.x))) )
@@ -104,6 +105,7 @@ datos_preparto <- datos_preparto |>
 ```{r}
 #Para graficar variables categoricas
 cat_vars <- names(Filter(is.factor, datos_preparto))
+num_vars <- c("Pesove", "CCove", "Gainseñal", "Lagubre", "Ancubre")
 
 nombresbien <- c("Edad (cronología dentaria)", 
                  "Número de partos",
@@ -180,7 +182,46 @@ for (i in 1:length(num_vars)) {
   
 }
   
+
+#AGREGAR RUIDO RANDOM?? Kruskal-Wallis
  
+```
+
+```{r}
+
+
+cor_m <- datos_preparto |> select(all_of(num_vars)) |> cor(use = "complete.obs")
+
+ggcorrplot(cor_m,
+           hc.order = TRUE,
+           lab = TRUE,
+           type = "lower",
+           lab_size = 2,                  
+           show.diag = FALSE,
+           colors = c("#EA4DA4", "#FFFFFF", "#A81EEB"), 
+           outline.color = NA,
+           tl.cex = 10) +           
+  labs(caption = "Fig. 6: Matriz de correlaciones entre variables numéricas",
+       x="", y ="") +
+  
+  theme(plot.caption = element_text(size = 12,
+                                    hjust = 0.5,
+                                    margin = margin(t = 16)),
+        plot.caption.position = "plot") +
+  
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 16),
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+    axis.text.y = element_text(size = 10),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8),
+    legend.key.height = unit(0.9, "cm"),    
+    legend.key.width = unit(0.4, "cm"),
+    panel.grid = element_blank()
+  )
+
+cor_m
+#DETECTAR OUTLIER PARA UBRE!!
 ```
 
 ```{r}
