@@ -173,17 +173,55 @@ nombres_num <- c("Peso de la oveja",
                  "Ancho de ubre (cm)",
                  "Ancho del pezón (cm)",
                  "Largo del pezón (cm)")
+
+#variables numericas discretas
+num_disc <- c("CCove",
+              "Anchopez")
+
+nombres_disc <- c("Condición corporal de la oveja",
+                  "Ancho del pezón (cm)")
+
+#variables numericas continuas
+num_cont <- c("Pesove",
+              "Lagubre",
+              "Ancubre",
+              "Largopez")
+
+nombres_cont <- c("Peso de la oveja",
+                 "Largo de ubre (cm)",
+                 "Ancho de ubre (cm)",
+                 "Largo del pezón (cm)")
+```
+
+```{r}
+#Diagrama de barras
+for (i in 1:length(num_disc)) {
+  
+  graficos <- ggplot(datos_preparto,
+                     aes(x = factor(.data[[num_disc[i]]]))) +
+    
+    geom_bar(fill = "#f0746e",
+             color = "white",
+             alpha = 0.8) +
+    
+    theme_minimal() +
+    xlab(nombres_disc[i]) +
+    ylab("Frecuencia")
+  
+  print(graficos)
+  
+}
 ```
 
 ```{r}
 #Histograma
-for (i in 1:length(num_vars)) {
+for (i in 1:length(num_cont)) {
   
   graficos <- ggplot(datos_preparto,
-                     aes(x = .data[[num_vars[i]]])) +
+                     aes(x = .data[[num_cont[i]]])) +
     
     geom_histogram(aes(y = after_stat(density)),
-                   fill = "grey75",
+                   fill = "grey",
                    color = "white",
                    bins = 15,
                    alpha = 0.8) +
@@ -194,7 +232,7 @@ for (i in 1:length(num_vars)) {
                  linewidth = 0.7) +
     
     theme_minimal() +
-    xlab(nombres_num[i]) +
+    xlab(nombres_cont[i]) +
     ylab("Densidad")
   
   print(graficos)
@@ -203,20 +241,27 @@ for (i in 1:length(num_vars)) {
 ```
 
 ```{r}
-for (i in 1:length(num_vars)) {
-  
-  graficos <- ggplot(datos_preparto,
-                     aes(y = .data[[num_vars[i]]])) +
-    
-    geom_boxplot(fill = "#b9257a",
-                 color = "black") +
-    theme_minimal() +
-    xlab("") +
-    ylab(nombres_num[i])
-  
-  print(graficos)
-  
-}
+library(patchwork)
+
+g1 <- ggplot(datos_preparto, aes(y = CCove)) +
+  geom_boxplot(fill = "#fcde9c") +
+  labs(x = "Condición corporal de la oveja",
+       y="") +
+  theme_minimal()
+
+g2 <- ggplot(datos_preparto, aes(y = Lagubre)) +
+  geom_boxplot(fill = "#e34f6f") +
+  labs(x = "Largo de ubre (cm)",
+       y="") +
+  theme_minimal()
+
+g3 <- ggplot(datos_preparto, aes(y = Largopez)) +
+  geom_boxplot(fill = "#7c1d6f") +
+  labs(x = "Largo del pezón (cm)",
+       y="") +
+  theme_minimal()
+
+g1 + g2 + g3
 ```
 
 ```{r}
