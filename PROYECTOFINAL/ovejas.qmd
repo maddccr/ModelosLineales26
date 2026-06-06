@@ -12,6 +12,7 @@ library(tidyverse)
 library(ggplot2)
 library(rcartocolor)
 library(ggcorrplot)
+library(knitr)
 ```
 
 Cargamos datos
@@ -129,8 +130,18 @@ nombresbien <- c("Edad (cronología dentaria)",
 
 ```{r}
 #Densidad
+
 ggplot(datos_preparto, aes(x = Gainseñal)) +
   geom_density(fill = "deeppink3", alpha = 0.4) +
+  geom_vline(xintercept = mean(datos_preparto$Gainseñal),
+             linetype = "dashed",
+             linewidth = 1) +
+  annotate("text",
+           x = mean(datos_preparto$Gainseñal),
+           y = 0,
+           label = "Media",
+           angle = 90,
+           vjust = -0.5) +
   theme_minimal() +
   labs(x = "Ganancia media de peso diario",
        y = "Densidad")
@@ -144,16 +155,12 @@ datos_preparto |>
     Desvio = sd(Gainseñal),
     Minimo = min(Gainseñal),
     Maximo = max(Gainseñal)
-  )
+  ) |> kable()
 ```
 
 ### Variables Numéricas
 
-ari
-
 ```{r}
-#CORRELACION ENTRE PESOOVEJA, CCOVE, medidas, CON GAINSENAL
-
 num_vars <- datos_preparto |> 
   select(where(is.numeric)) |> 
   names()
@@ -166,6 +173,73 @@ nombres_num <- c("Peso de la oveja",
                  "Ancho de ubre (cm)",
                  "Ancho del pezón (cm)",
                  "Largo del pezón (cm)")
+```
+
+```{r}
+#Histograma
+for (i in 1:length(num_vars)) {
+  
+  graficos <- ggplot(datos_preparto,
+                     aes(x = .data[[num_vars[i]]])) +
+    
+    geom_histogram(aes(y = after_stat(density)),
+                   fill = "grey75",
+                   color = "white",
+                   bins = 15,
+                   alpha = 0.8) +
+    
+    geom_density(fill = "deeppink3",
+                 alpha = 0.55,
+                 color = "deeppink4",
+                 linewidth = 0.7) +
+    
+    theme_minimal() +
+    xlab(nombres_num[i]) +
+    ylab("Densidad")
+  
+  print(graficos)
+  
+}
+```
+
+```{r}
+for (i in 1:length(num_vars)) {
+  
+  graficos <- ggplot(datos_preparto,
+                     aes(y = .data[[num_vars[i]]])) +
+    
+    geom_boxplot(fill = "deeppink3",
+                 color = "black") +
+    theme_minimal() +
+    xlab("") +
+    ylab(nombres_num[i])
+  
+  print(graficos)
+  
+}
+```
+
+```{r}
+datos_preparto |>
+  select(all_of(num_vars)) |>
+  pivot_longer(
+    everything(),
+    names_to = "Variable",
+    values_to = "Valor"
+  ) |>
+  group_by(Variable) |>
+  summarise(
+    Media = mean(Valor),
+    Mediana = median(Valor),
+    Desvio = sd(Valor),
+    Minimo = min(Valor),
+    Maximo = max(Valor)
+  ) |>
+  kable(digits = 2)
+```
+
+```{r}
+#CORRELACION ENTRE PESOOVEJA, CCOVE, medidas, CON GAINSENAL
 
 for (i in 1:length(num_vars)) {
   
