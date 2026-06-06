@@ -6,6 +6,8 @@ editor: visual
 
 ## 
 
+#### Librerías y paquetes
+
 ```{r, warning =FALSE, message=FALSE}
 library(readxl)
 library(tidyverse)
@@ -15,7 +17,7 @@ library(ggcorrplot)
 library(knitr)
 ```
 
-Cargamos datos
+#### Cargar datos
 
 ```{r}
 datos <- read_excel("datosoveja.xlsx", sheet = "Datos hasta señalada", na = "." )
@@ -27,7 +29,7 @@ datos_preparto <- datos |> filter( Momento == "Preparto") #momento elegido para 
 
 ```
 
-Analisis de datos faltantes
+**Datos faltantes (NAs)**
 
 ```{r}
 nrow(na.omit(datos_preparto)) #159 174 yipii 
@@ -39,7 +41,7 @@ nrow(na.omit(datos |> filter( Momento == "Preencarnerada") )) #57
 datos_preparto <- na.omit(datos_preparto)
 ```
 
-Recodificacion de las variables
+#### Recodificación de variables
 
 ```{r, warning =FALSE}
 
@@ -79,6 +81,7 @@ datos_preparto <- datos_preparto |> select(-PadCord, -PN, -Nodpez, -Indupez)
 ```
 
 ```{r}
+#Renombre de niveles de los factores
 datos_preparto <- datos_preparto |> 
   mutate(
     Partos = fct_recode(Partos,"Multipara" = "M","Primipara" = "P"),
@@ -108,7 +111,7 @@ datos_preparto <- datos_preparto |>
 cat_vars <- names(Filter(is.factor, datos_preparto))
 num_vars <- c("Pesove", "CCove", "Gainseñal", "Lagubre", "Ancubre")
 
-nombresbien <- c("Edad (cronología dentaria)", 
+nombres_cat <- c("Edad (cronología dentaria)", 
                  "Número de partos",
                  "Manejo reproductivo",
                  "Tipo de nacimiento",
@@ -122,9 +125,19 @@ nombresbien <- c("Edad (cronología dentaria)",
                  "Separación ubre",
                  "Ubicación pezones",
                  "Simetría ubre"    )
+
+
+nombres_num <- c("Peso de la oveja",
+                 "Condición corporal de la oveja",
+                 "Largo de ubre (cm)",
+                 "Ancho de ubre (cm)")
+
+#viridis(10, option = "D")
+
+paletaV <- c("#b7e6a5","#7ccba2","#46aea0","#089099","#00718b","#045275")
 ```
 
-## Analisis Univariado
+## Análisis Univariado
 
 ### Variable Respuesta: Ganancia media de peso diario
 
@@ -132,7 +145,7 @@ nombresbien <- c("Edad (cronología dentaria)",
 #Densidad
 
 ggplot(datos_preparto, aes(x = Gainseñal)) +
-  geom_density(fill = "#b9257a", alpha = 0.4) +
+  geom_density(fill = "#00718b", alpha = 0.4) +
   geom_vline(xintercept = mean(datos_preparto$Gainseñal),
              linetype = "dashed",
              linewidth = 1) +
@@ -144,7 +157,9 @@ ggplot(datos_preparto, aes(x = Gainseñal)) +
            vjust = -0.5) +
   theme_minimal() +
   labs(x = "Ganancia media de peso diario",
-       y = "Densidad")
+       y = "Densidad",
+       title = "Distribución de la ganancia media de peso diario",
+       subtitle = "(Nacimiento hasta señalada)")
 ```
 
 ```{r}
@@ -158,29 +173,16 @@ datos_preparto |>
   ) |> kable()
 ```
 
-### Variables Numéricas
-
-```{r}
-num_vars <- datos_preparto |> 
-  select(where(is.numeric)) |> 
-  names()
-
-num_vars <- setdiff(num_vars, c("IDM", "Idcord", "Gainseñal"))
-
-nombres_num <- c("Peso de la oveja",
-                 "Condición corporal de la oveja",
-                 "Largo de ubre (cm)",
-                 "Ancho de ubre (cm)",
-                 "Ancho del pezón (cm)",
-                 "Largo del pezón (cm)")
-```
+### Variables Explicativas Numéricas
 
 ```{r}
 #Histograma
-for (i in 1:length(num_vars)) {
+num_vars2 <- setdiff(num_vars, c("Gainseñal"))
+
+for (i in 1:length(num_vars2)) {
   
   graficos <- ggplot(datos_preparto,
-                     aes(x = .data[[num_vars[i]]])) +
+                     aes(x = .data[[num_vars2[i]]])) +
     
     geom_histogram(aes(y = after_stat(density)),
                    fill = "grey75",
@@ -188,9 +190,9 @@ for (i in 1:length(num_vars)) {
                    bins = 15,
                    alpha = 0.8) +
     
-    geom_density(fill = "#dc3977",
+    geom_density(fill = "#00718b",
                  alpha = 0.55,
-                 color = "#b9257a",
+                 color = "#045275",
                  linewidth = 0.7) +
     
     theme_minimal() +
@@ -200,15 +202,20 @@ for (i in 1:length(num_vars)) {
   print(graficos)
   
 }
+
+
+
+#OJO NO HACER PARA NUMERICAS DISCRETA!!! (CC y ANCHO)
+#FALTAN LOS TITULOS
 ```
 
 ```{r}
-for (i in 1:length(num_vars)) {
+for (i in 1:length(num_vars2)) {
   
   graficos <- ggplot(datos_preparto,
-                     aes(y = .data[[num_vars[i]]])) +
+                     aes(y = .data[[num_vars2[i]]])) +
     
-    geom_boxplot(fill = "#b9257a",
+    geom_boxplot(fill = "#00718b",
                  color = "black") +
     theme_minimal() +
     xlab("") +
@@ -217,6 +224,8 @@ for (i in 1:length(num_vars)) {
   print(graficos)
   
 }
+
+#SOLO DEJAR LOS QUE PRESENTAN OUTLIERS 
 ```
 
 ```{r}
@@ -238,16 +247,44 @@ datos_preparto |>
   kable(digits = 2)
 ```
 
+### Variables Explicativas Categóricas
+
+```{r}
+#Variables categóricas
+#NODULOS CHEQUEAR CUANTAS TIENEN
+#INDURACIONES IDEM. AUNQUE HAY UN POCO MAS
+#pocas no simet
+
+for (i in 1:length(cat_vars)) {
+  graficos <- ggplot(datos_preparto, aes(x= .data[[cat_vars[i]]], 
+                                        fill = .data[[cat_vars[i]]])) + 
+    geom_bar() +
+    theme_minimal() +
+    xlab(nombres_cat[i]) +
+    ylab(" ") +
+    theme(legend.position = "none") +
+    scale_fill_manual(values = paletaV) 
+  
+  print(graficos)
+} 
+```
+
+**#OJO DATOS NO HOMOGENEOS PREGUNTAR EL PARTES // SE PUEDEN PONDERAR O PENALIZAR LAS CATEGORIAS PARA BALANCEAR LOS DATOS???**
+
+## Análisis Bivariado (relaciones)
+
+### Variables Explicativas Numéricas y Respuesta
+
 ```{r}
 #CORRELACION ENTRE PESOOVEJA, CCOVE, medidas, CON GAINSENAL
 
-for (i in 1:length(num_vars)) {
+for (i in 1:length(num_vars2)) {
   
   graficos <- ggplot(datos_preparto, 
-                     aes(x= .data[[num_vars[i]]], 
+                     aes(x= .data[[num_vars2[i]]], 
                          y= Gainseñal)) +
     
-    geom_point(color = "#7c1d6f") +
+    geom_point(color = "#045275") +
     theme_minimal() +
     xlab(nombres_num[i]) +
     ylab("Ganancia media de peso diario")
@@ -257,12 +294,12 @@ for (i in 1:length(num_vars)) {
 }
   
 
-#AGREGAR RUIDO RANDOM?? Kruskal-Wallis
- 
+#AGREGAR RUIDO RANDOM?? Kruskal-Wallis 
+#CC NO HACER 
+
 ```
 
 ```{r}
-
 
 cor_m <- datos_preparto |> select(all_of(num_vars)) |> cor(use = "complete.obs")
 
@@ -272,7 +309,7 @@ ggcorrplot(cor_m,
            type = "lower",
            lab_size = 2,                  
            show.diag = FALSE,
-           colors = c("#faa476", "#FFFFFF", "#b9257a"), 
+           colors = c("#b7e6a5", "#FFFFFF", "#045275"), 
            outline.color = NA,
            tl.cex = 10) +           
   labs(caption = "Fig. 6: Matriz de correlaciones entre variables numéricas",
@@ -294,39 +331,16 @@ ggcorrplot(cor_m,
     panel.grid = element_blank()
   )
 
-cor_m
 #DETECTAR OUTLIER PARA UBRE!!
+#OJO DE VUELTA CCOVE ES DISCRETA
+#USAR RENOMBRES????
 ```
 
-```{r}
-#Variables categóricas
-
-#NODULOS CHEQUEAR CUANTAS TIENEN
-#INDURACIONES IDEM. AUNQUE HAY UN POCO MAS
-#pocas no simet
-
-for (i in 1:length(cat_vars)) {
-  graficos <- ggplot(datos_preparto, aes(x= .data[[cat_vars[i]]], 
-                                        fill = .data[[cat_vars[i]]])) + 
-    geom_bar() +
-    theme_minimal() +
-    xlab(nombresbien[i]) +
-    theme(legend.position = "none") +
-    scale_fill_carto_d(palette = "SunsetDark", 
-                       type = "qualitative",
-                       name = nombresbien[i])
-  
-  print(graficos)
-} 
-```
-
-**#OJO DATOS NO HOMOGENEOS PREGUNTAR EL PARTES // SE PUEDEN PONDERAR O PENALIZAR LAS CATEGORIAS PARA BALANCEAR LOS DATOS**
-
-Relacion entre variables categoricas y la respuesta
+### Variables Explicativas Categóricas y Respuesta
 
 ```{r}
 
-paleta <- c("#fcde9c","#faa476","#f0746e","#e34f6f","#dc3977","#b9257a","#7c1d6f")
+#paleta <- c("#fcde9c","#faa476","#f0746e","#e34f6f","#dc3977","#b9257a","#7c1d6f")
 
 for(i in 1:length(cat_vars)) {
    
@@ -335,10 +349,8 @@ for(i in 1:length(cat_vars)) {
                              fill = .data[[cat_vars[i]]] )) + 
     geom_boxplot() +
     ylab('Ganancia media de peso diario') +
-    xlab(nombresbien[i]) +
-    scale_fill_carto_d(palette = "SunsetDark", 
-                       type = "qualitative",
-                       name = nombresbien[i]) +
+    xlab(nombres_cat[i]) +
+    scale_fill_manual(values = paletaV) +
     theme_minimal() +
     theme(legend.position = "none",
           axis.title.x = element_text(margin = margin(t = 20)),
@@ -351,6 +363,8 @@ for(i in 1:length(cat_vars)) {
 
 
 ```
+
+## Análisis Multivariado (Interacciones)
 
 VER INTERACCIONES
 
