@@ -6,7 +6,7 @@ editor: visual
 
 ## 
 
-```{r, warning =FALSE}
+```{r, warning =FALSE, message=FALSE}
 library(readxl)
 library(tidyverse)
 library(ggplot2)
@@ -118,126 +118,91 @@ nombresbien <- c("Edad (cronología dentaria)",
                  "Suspensión ubre",
                  "Separación ubre",
                  "Ubicación pezones",
-                 "Simiatría ubre"    )
+                 "Simetría ubre"    )
+```
+
+## Analisis Univariado
+
+### Variable Respuesta: Ganancia media de peso diario
+
+```{r}
+#Densidad
+ggplot(datos_preparto, aes(x = Gainseñal)) +
+  geom_density(fill = "deeppink3", alpha = 0.4) +
+  theme_minimal() +
+  labs(x = "Ganancia media de peso diario",
+       y = "Densidad")
 ```
 
 ```{r}
-#CORR ENTRE PESOOVEJA Y CCOVE CON GAINSENALA
+datos_preparto |>
+  summarise(
+    Media = mean(Gainseñal),
+    Mediana = median(Gainseñal),
+    Desvio = sd(Gainseñal),
+    Minimo = min(Gainseñal),
+    Maximo = max(Gainseñal)
+  )
+```
+
+### Variables Numéricas
+
+ari
+
+```{r}
+#CORRELACION ENTRE PESOOVEJA, CCOVE, medidas, CON GAINSENAL
+
+num_vars <- datos_preparto |> 
+  select(where(is.numeric)) |> 
+  names()
+
+num_vars <- setdiff(num_vars, c("IDM", "Idcord", "Gainseñal"))
+
+nombres_num <- c("Peso de la oveja",
+                 "Condición corporal de la oveja",
+                 "Largo de ubre (cm)",
+                 "Ancho de ubre (cm)",
+                 "Ancho del pezón (cm)",
+                 "Largo del pezón (cm)")
+
+for (i in 1:length(num_vars)) {
+  
+  graficos <- ggplot(datos_preparto, 
+                     aes(x= .data[[num_vars[i]]], 
+                         y= Gainseñal)) +
+    
+    geom_point(color = "purple3") +
+    theme_minimal() +
+    xlab(nombres_num[i]) +
+    ylab("Ganancia media de peso diario")
+  
+  print(graficos)
+  
+}
+  
  
 ```
 
 ```{r}
 #Variables categóricas
-datos_preparto |> ggplot() +
-  geom_bar(aes(x=Edad, fill = Edad)) +
-  theme_minimal() +
-  labs(title = "Edad de las madres, según cronología dentaria") +
-  theme(legend.position = "none")
-  
-
-datos_preparto |> ggplot() +
-  geom_bar(aes(x=Partos, fill = Partos)) +
-  theme_minimal() +
-  labs(title = "Número de partos") +
-  scale_fill_discrete(labels = c("P" = "Primer parto", 
-                              "M" = "Dos o más partos"))
-
-datos_preparto |> ggplot() + 
-  geom_bar(aes(x=LOTE, fill = LOTE)) +
-  theme_minimal() +
-  labs(title = "Manejo reproductivo") +
-  scale_fill_discrete(labels = c("IA" = "Inseminación artificial", 
-                                 "R" = "Repaso con carnero"))
-
-datos_preparto |> ggplot() +
-  geom_bar(aes(x=Tiponac, fill = Tiponac)) +
-  theme_minimal() +
-  labs(title = "Tipo de nacimiento") +
-  scale_fill_discrete(labels = c("1" = "Un solo cordero", 
-                                 "2" = "Mellizos o trillizos"))
-  
-datos_preparto |> ggplot() +
-  geom_bar(aes(x=Potrepari, fill = Potrepari))+
-  theme_minimal() +
-  labs(title = "Potrero donde nacio el cordero") +
-  theme(legend.position = "none")
-
-datos_preparto |> ggplot() +
-  geom_bar(aes(x=Sex, fill = Sex)) +
-  theme_minimal() +
-  labs(title = "Sexo del cordero") +
-  theme(legend.position = "none")
 
 #NODULOS CHEQUEAR CUANTAS TIENEN
-datos_preparto |> ggplot() +
-  geom_bar(aes(x=Nodu)) +
-  theme_minimal() +
-  labs(title = "Nódulos en ubre") +
-  scale_fill_discrete(labels = c("0" = "Sin nódulo", 
-                                 "1" = "Con nódulo"))
 #INDURACIONES IDEM. AUNQUE HAY UN POCO MAS
-datos_preparto |> ggplot() +
-  geom_bar(aes(x=Induru)) +
-  theme_minimal() +
-  labs(title = "Induración en ubre") +
-  scale_fill_discrete(labels = c("0" = "Sin induraciones", 
-                                 "1" = "Con induración"))
-
-datos_preparto |> ggplot() +
-  geom_bar(aes(x=Eco)) +
-  theme_minimal() +
-  labs(title = "Alteraciones ecográficas") +
-  scale_fill_discrete(labels = c("0" = "Normal", 
-                                 "1" = "Alteración"))
-
-
-#NODPEZ=0 PARA TODAS LAS OBSERVACIONES
-#datos_preparto |> ggplot() +
-  #geom_bar(aes(x=Nodpez))
-
-
-
-#INDURACION EN PEZONES CHEQUEAR CUANTAS TIENEN SAQUE LA VARIABLE
-#datos_preparto |> ggplot() +
-  #geom_bar(aes(x=Indupez))
-
-#POR QUE LAS CATEGORÍAS SON AUSENCIA Y PRESENCIA?
-datos_preparto |> ggplot() +
-  geom_bar(aes(x=Peznum)) +
-  theme_minimal() +
-  labs(title = "Numero de pezones?") +
-  scale_fill_discrete(labels = c("0" = "Ausencia", 
-                                 "1" = "Presencia"))
-
-datos_preparto |> ggplot() +
-  geom_bar(aes(x=Suspen, fill = Suspen)) +
-  theme_minimal() +
-  labs(title = "Suspensión de la ubre") +
-  scale_fill_discrete(labels = c("1" = "Más ancha que larga", 
-                                 "2" = "Cuadrada",
-                                 "3" = "Pendulosa: máslarga que ancha"))
-
-datos_preparto |> ggplot() +
-  geom_bar(aes(x=Separ, fill = Separ)) +
-  theme_minimal() +
-  labs(title = "Separación de la ubre") +
-  scale_fill_discrete(labels = c("1" = "Bien separadas", 
-                                 "2" = "Moderada separación",
-                                 "3" = "Sin separación"))
-
-datos_preparto |> ggplot() +
-  geom_bar(aes(x=Ubicpez, fill = Ubicpez)) +
-  theme_minimal() +
-  labs(title = "Ubicación de los pezones") +
-  scale_fill_discrete(labels = c("1" = "Lateral", 
-                                 "2" = "Vertical",
-                                 "3" = "Horizontal"))
 #pocas no simet
-datos_preparto |> ggplot() +
-  geom_bar(aes(x=Simet, fill = Simet)) +
-  labs(title = "Simetría ubre") +
-  scale_fill_discrete(labels = c("0" = "Simétrica", 
-                                 "1" = "No simétrica"))
+
+for (i in 1:length(cat_vars)) {
+  graficos <- ggplot(datos_preparto, aes(x= .data[[cat_vars[i]]], 
+                                        fill = .data[[cat_vars[i]]])) + 
+    geom_bar() +
+    theme_minimal() +
+    xlab(nombresbien[i]) +
+    theme(legend.position = "none") +
+    scale_fill_carto_d(palette = "SunsetDark", 
+                       type = "qualitative",
+                       name = nombresbien[i])
+  
+  print(graficos)
+} 
 ```
 
 **#OJO DATOS NO HOMOGENEOS PREGUNTAR EL PARTES // SE PUEDEN PONDERAR O PENALIZAR LAS CATEGORIAS PARA BALANCEAR LOS DATOS**
