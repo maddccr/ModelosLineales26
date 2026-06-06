@@ -17,7 +17,7 @@ Cargamos datos
 
 ```{r}
 
-datos <- read_excel("datosovejas.xlsx", sheet = "Datos hasta señalada", na = "." )
+datos <- read_excel("datosoveja.xlsx", sheet = "Datos hasta señalada", na = "." )
 str(datos)
 
 datos$Tiponac[datos$Tiponac == "3"] <- 2 #recodificacion
