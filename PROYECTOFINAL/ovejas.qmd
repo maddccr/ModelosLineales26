@@ -173,7 +173,7 @@ for (i in 1:length(num_vars)) {
                      aes(x= .data[[num_vars[i]]], 
                          y= Gainseñal)) +
     
-    geom_point(color = "purple3") +
+    geom_point(color = "#7c1d6f") +
     theme_minimal() +
     xlab(nombres_num[i]) +
     ylab("Ganancia media de peso diario")
@@ -198,7 +198,7 @@ ggcorrplot(cor_m,
            type = "lower",
            lab_size = 2,                  
            show.diag = FALSE,
-           colors = c("#EA4DA4", "#FFFFFF", "#A81EEB"), 
+           colors = c("#faa476", "#FFFFFF", "#b9257a"), 
            outline.color = NA,
            tl.cex = 10) +           
   labs(caption = "Fig. 6: Matriz de correlaciones entre variables numéricas",
@@ -251,6 +251,8 @@ for (i in 1:length(cat_vars)) {
 Relacion entre variables categoricas y la respuesta
 
 ```{r}
+
+paleta <- c("#fcde9c","#faa476","#f0746e","#e34f6f","#dc3977","#b9257a","#7c1d6f")
 
 for(i in 1:length(cat_vars)) {
    
