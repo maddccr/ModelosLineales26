@@ -402,3 +402,20 @@ VER INTERACCIONES
 #POTRERO Y TIPONAC INTERACCION!!!
 
 #EDAD Y CONDICION CORPORAL
+
+```{r}
+library(grpreg)
+
+#LASSO :0
+x_matrix <- model.matrix(Gainseñal ~ Edad + Partos + Pesove + CCove + LOTE + Tiponac + Potrepari + Sex + Nodu + Induru + Eco + Lagubre + Ancubre + Anchopez + Largopez + Peznum + Suspen + Separ + Ubicpez + Simet, data = datos_preparto)[, -1]
+
+y_vector <- datos_preparto$Gainseñal
+
+group_index <- c(1,1,1,1,2,3,4,5,6,7,7,8,9,10,11,12,13,14,15,16,17,17,18,18,19,19,20)
+
+cv_grpreg <- cv.grpreg(x_matrix, y_vector, group = group_index, penalty = "grLasso")
+
+coef(cv_grpreg, s = "lambda.min")
+
+#Variables con coeficiente 0 : Nodu, Lagubre, Anchopez, Largopez, Peznum, Suspen, Separ, Ubicpez
+```
