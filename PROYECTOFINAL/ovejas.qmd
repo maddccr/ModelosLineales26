@@ -241,6 +241,7 @@ for (i in 1:length(num_cont)) {
 ```
 
 ```{r}
+#ELIMINAR NUMERO DE ABAJOOOOOOOOOOOOOOOOOO
 library(patchwork)
 
 g1 <- ggplot(datos_preparto, aes(y = CCove)) +
@@ -433,10 +434,11 @@ modelo_1 <- lm(
 )
 
 summary(modelo_1)
+anova(modelo_1) #que hace?
 ```
 
 ```{r}
-#ajustamos modelo segun variables significativas
+#ajustamos modelo segun variables significativas al 5%
 modelo_2 <- lm(
   Gainseñal ~ Pesove + Tiponac + Sex,
   data = datos_preparto
