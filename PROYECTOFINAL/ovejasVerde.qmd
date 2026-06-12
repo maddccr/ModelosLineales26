@@ -15,6 +15,8 @@ library(ggplot2)
 library(rcartocolor)
 library(ggcorrplot)
 library(knitr)
+
+#
 ```
 
 #### Cargar datos
@@ -359,7 +361,7 @@ for(i in 1:length(cat_vars)) {
   print(g)
 }
 
-
+#t.test jijijijiji 
 
 
 ```
@@ -371,3 +373,94 @@ VER INTERACCIONES
 #POTRERO Y TIPONAC INTERACCION!!!
 
 #EDAD Y CONDICION CORPORAL
+
+```{r}
+
+table(datos_preparto$Potrepari, datos_preparto$Tiponac)
+
+
+
+ggplot(datos_preparto, aes(x = Potrepari , y = Gainseñal, fill = Potrepari )) +
+  geom_boxplot() +
+  xlab('TipoNac') + 
+  ylab('Gain') +
+  theme_bw() +
+  theme(legend.position = 'bottom',
+        text = element_text(size = 15)) +
+  facet_grid(~Tiponac)
+
+
+datos_preparto |> 
+  group_by(Tiponac, Potrepari) |> 
+  summarise(media = mean(Gainseñal)) |> 
+  ggplot(aes(x = Potrepari, y = media, color = Tiponac)) +
+    geom_line(aes(group = Tiponac)) +
+    geom_point() +
+    theme_bw() +
+    theme(text = element_text(size = 15))
+
+#Alreves
+
+datos_preparto |> 
+  group_by(Tiponac, Potrepari) |> 
+  summarise(media = mean(Gainseñal)) |> 
+  ggplot(aes(x = Tiponac, y = media, color = Potrepari)) +
+    geom_line(aes(group = Potrepari)) +
+    geom_point() +
+    theme_bw() +
+    theme(text = element_text(size = 15))
+
+
+#si datos balanceados el beta gorro da igual?? (tratamiento vs. tratamiento + sexo) cambia el df y el sigma gorro de los erros --> cambia o_valor
+#OJO VER DIF AJUSTADO POR VS EL SI DEPENDE DE --> tratamiento*sexo
+
+#summary duele ---> emmens 
+
+#Si la interaccion signif me la quedo. Anova con libreria cars // si no vuelve al aditivo!!!!!!! // si el sexo modifica el valor del tratamiento
+
+#PARA EL TALLER: modelo con inter + adiviivo // + sexo + sexo:tratamiento
+
+#A*B = A + B + A.B ???? // 
+
+#Si trat solo sif y trat + pre igual trat sig /// entonces no dependen del pre
+#CUAL ES LA HISTORIA 
+
+#COMO UTILIZAR Y PARA QUE SIRVE // interes en estas cosas// ojo 
+# Y = post - pre (ganancia??)
+#GLM --> la Y deja de ser numeros omg omg omg 
+```
+
+```{r}
+
+#EDAD Y CCOVE
+
+table(datos_preparto$Edad, datos_preparto$CCove)
+
+```
+
+```{r}
+
+#CHANCHADAS 
+
+ggplot(datos_preparto, aes(x = Edad , y = CCove, fill = Edad )) +
+  geom_boxplot() +
+  xlab('Edad') + 
+  ylab('CCove') +
+  theme_bw() +
+  theme(legend.position = 'bottom',
+        text = element_text(size = 15)) 
+
+
+
+
+#Alreves
+
+datos_preparto |> 
+  group_by(CCove, Edad) |> 
+  summarise(media = mean(Gainseñal)) |> 
+  ggplot(aes(x = CCove, y = media, color = Edad)) +
+    geom_line(aes(group = Edad)) +
+    geom_point() +
+    theme_bw() +
+    theme(text = element_text(size = 15))
+```
