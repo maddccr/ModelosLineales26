@@ -419,3 +419,50 @@ coef(cv_grpreg, s = "lambda.min")
 
 #Variables con coeficiente 0 : Nodu, Lagubre, Anchopez, Largopez, Peznum, Suspen, Separ, Ubicpez
 ```
+
+## Primer modelo
+
+```{r}
+#primer modelo para ver significacion de las variables
+modelo_1 <- lm(
+  Gainseñal ~ Edad + Partos + Pesove + CCove + LOTE + Tiponac +
+    Potrepari + Sex + Nodu + Induru + Eco + Lagubre +
+    Ancubre + Anchopez + Largopez + Peznum + Suspen +
+    Separ + Ubicpez + Simet,
+  data = datos_preparto
+)
+
+summary(modelo_1)
+```
+
+```{r}
+#ajustamos modelo segun variables significativas
+modelo_2 <- lm(
+  Gainseñal ~ Pesove + Tiponac + Sex,
+  data = datos_preparto
+)
+
+summary(modelo_2)
+```
+
+```{r}
+#vemos que SEX deja de ser significativa 
+modelo_3 <- lm(
+  Gainseñal ~ Pesove + Tiponac,
+  data = datos_preparto
+)
+
+summary(modelo_3)
+```
+
+```{r}
+df <- data.frame(
+  Pesove = mean(datos_preparto$Pesove),
+  Tiponac = factor("Múltiple",
+                   levels = levels(datos_preparto$Tiponac))
+)
+predict(modelo_3,
+        newdata = df,
+        interval = "confidence",
+        level = 0.95)
+```
