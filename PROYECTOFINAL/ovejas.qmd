@@ -6,6 +6,8 @@ editor: visual
 
 ## 
 
+#### Librerías y paquetes
+
 ```{r, warning =FALSE, message=FALSE}
 library(readxl)
 library(tidyverse)
@@ -13,22 +15,27 @@ library(ggplot2)
 library(rcartocolor)
 library(ggcorrplot)
 library(knitr)
+
+
 library(car)
+library(grpreg)
+library(ggrepel) #esta que hace
 ```
 
-Cargamos datos
+#### Data wrangling
+
+#### Cargar datos
 
 ```{r}
 datos <- read_excel("datosoveja.xlsx", sheet = "Datos hasta señalada", na = "." )
 #str(datos)
 
-datos$Tiponac[datos$Tiponac == "3"] <- 2 #recodificacion
-
-datos_preparto <- datos |> filter( Momento == "Preparto") #momento elegido para el primer analisis
+datos_preparto <- datos |> filter( Momento == "Preparto") 
+#momento elegido para el primer analisis
 
 ```
 
-Analisis de datos faltantes
+**Datos faltantes (NAs)**
 
 ```{r}
 nrow(na.omit(datos_preparto)) #159 174 yipii 
@@ -40,9 +47,11 @@ nrow(na.omit(datos |> filter( Momento == "Preencarnerada") )) #57
 datos_preparto <- na.omit(datos_preparto)
 ```
 
-Recodificacion de las variables
+#### Recodificación de variables
 
 ```{r, warning =FALSE}
+
+datos$Tiponac[datos$Tiponac == "3"] <- 2 
 
 datos_preparto <- datos_preparto |> 
   mutate(Edad = as.factor(Edad),
@@ -67,11 +76,10 @@ datos_preparto <- datos_preparto |>
          Simet = as.factor(Simet) ) 
 
 #str(datos_preparto)
-
-#Detectamos que no hay nodulos en los pezones
 which(datos_preparto$Indupez == 1) #hay uno solo
 datos_preparto$Indupez[datos_preparto$Indupez == 1] 
 
+#Eliminamos variables no relevantes para el analisis o por falta extrema de homegenidad en categorias
 datos_preparto <- datos_preparto |> dplyr::select(-PadCord, -PN, 
                                            -Nodpez, -Indupez,
                                            -IDM, -Momento, -Idcord)
@@ -82,6 +90,7 @@ datos_preparto <- datos_preparto |> dplyr::select(-PadCord, -PN,
 ```
 
 ```{r}
+#Renombre de los niveles
 datos_preparto <- datos_preparto |> 
   mutate(
     Partos = fct_recode(Partos,"Multipara" = "M","Primipara" = "P"),
@@ -109,9 +118,9 @@ datos_preparto <- datos_preparto |>
 ```{r}
 #Para graficar variables categoricas
 cat_vars <- names(Filter(is.factor, datos_preparto))
-num_vars <- c("Pesove", "CCove", "Gainseñal", "Lagubre", "Ancubre")
+num_vars <- datos_preparto |> dplyr::select(where(is.numeric)) |> names()
 
-nombresbien <- c("Edad (cronología dentaria)", 
+nombres_cat <- c("Edad (cronología dentaria)", 
                  "Número de partos",
                  "Manejo reproductivo",
                  "Tipo de nacimiento",
@@ -125,9 +134,17 @@ nombresbien <- c("Edad (cronología dentaria)",
                  "Separación ubre",
                  "Ubicación pezones",
                  "Simetría ubre"    )
+
+
+nombres_num <- c("Peso de la oveja",
+                 "Condición corporal de la oveja",
+                 "Largo de ubre (cm)",
+                 "Ancho de ubre (cm)")
+
+paleta <- c("#fcde9c","#faa476","#f0746e","#e34f6f","#dc3977","#b9257a","#7c1d6f")
 ```
 
-## Analisis Univariado
+## Análisis Univariado
 
 ### Variable Respuesta: Ganancia media de peso diario
 
@@ -135,7 +152,7 @@ nombresbien <- c("Edad (cronología dentaria)",
 #Densidad
 
 ggplot(datos_preparto, aes(x = Gainseñal)) +
-  geom_density(fill = "#b9257a", alpha = 0.4) +
+  geom_density(fill = "#b9257a", alpha = 0.4, color = NA) +
   geom_vline(xintercept = mean(datos_preparto$Gainseñal),
              linetype = "dashed",
              linewidth = 1) +
@@ -147,7 +164,11 @@ ggplot(datos_preparto, aes(x = Gainseñal)) +
            vjust = -0.5) +
   theme_minimal() +
   labs(x = "Ganancia media de peso diario",
-       y = "Densidad")
+       y = "Densidad",
+       title = "Distribución de la ganancia media de peso diario",
+       subtitle = "(Nacimiento hasta señalada)")
+
+#quitar el borde
 ```
 
 ```{r}
@@ -161,21 +182,11 @@ datos_preparto |>
   ) |> kable()
 ```
 
-### Variables Numéricas
+### Variables Explicativas Numéricas
 
 ```{r}
-num_vars <- datos_preparto |> 
-  select(where(is.numeric)) |> 
-  names()
 
-num_vars <- setdiff(num_vars, c("IDM", "Idcord", "Gainseñal"))
-
-nombres_num <- c("Peso de la oveja",
-                 "Condición corporal de la oveja",
-                 "Largo de ubre (cm)",
-                 "Ancho de ubre (cm)",
-                 "Ancho del pezón (cm)",
-                 "Largo del pezón (cm)")
+num_vars2 <- setdiff(num_vars, "Gainseñal")
 
 #variables numericas discretas
 num_disc <- c("CCove",
@@ -203,7 +214,7 @@ for (i in 1:length(num_disc)) {
   graficos <- ggplot(datos_preparto,
                      aes(x = factor(.data[[num_disc[i]]]))) +
     
-    geom_bar(fill = "#f0746e",
+    geom_bar(fill = "#e34f6f",
              color = "white",
              alpha = 0.8) +
     
@@ -214,6 +225,9 @@ for (i in 1:length(num_disc)) {
   print(graficos)
   
 }
+
+
+#FALTAN LOS TITULOS
 ```
 
 ```{r}
@@ -231,7 +245,7 @@ for (i in 1:length(num_cont)) {
     
     geom_density(fill = "#dc3977",
                  alpha = 0.55,
-                 color = "#b9257a",
+                 color = NA,
                  linewidth = 0.7) +
     
     theme_minimal() +
@@ -244,33 +258,35 @@ for (i in 1:length(num_cont)) {
 ```
 
 ```{r}
-#ELIMINAR NUMERO DE ABAJOOOOOOOOOOOOOOOOOO
 library(patchwork)
 
 g1 <- ggplot(datos_preparto, aes(y = CCove)) +
-  geom_boxplot(fill = "#fcde9c") +
+  geom_boxplot(color = "#faa476", size = 0.6) +
   labs(x = "Condición corporal de la oveja",
        y="") +
   theme_minimal()
 
 g2 <- ggplot(datos_preparto, aes(y = Lagubre)) +
-  geom_boxplot(fill = "#e34f6f") +
+  geom_boxplot(color = "#e34f6f", size = 0.6) +
   labs(x = "Largo de ubre (cm)",
        y="") +
   theme_minimal()
 
 g3 <- ggplot(datos_preparto, aes(y = Largopez)) +
-  geom_boxplot(fill = "#7c1d6f") +
+  geom_boxplot(color = "#7c1d6f", size = 0.6) +
   labs(x = "Largo del pezón (cm)",
        y="") +
   theme_minimal()
 
 g1 + g2 + g3
+
+#ELIMINAR NUMERO DE ABAJOOOOOOOOOOOOOOOOOO
+#TITULO
 ```
 
 ```{r}
 datos_preparto |>
-  select(all_of(num_vars)) |>
+  dplyr::select(all_of(num_vars)) |>
   pivot_longer(
     everything(),
     names_to = "Variable",
@@ -286,6 +302,36 @@ datos_preparto |>
   ) |>
   kable(digits = 2)
 ```
+
+### Variables Explicativas Categóricas
+
+```{r}
+#Variables categóricas
+
+#NODULOS CHEQUEAR CUANTAS TIENEN
+#INDURACIONES IDEM. AUNQUE HAY UN POCO MAS
+#pocas no simet
+
+for (i in 1:length(cat_vars)) {
+  graficos <- ggplot(datos_preparto, aes(x= .data[[cat_vars[i]]], 
+                                        fill = .data[[cat_vars[i]]])) + 
+    geom_bar() +
+    theme_minimal() +
+    xlab(nombresbien[i]) +
+    theme(legend.position = "none") +
+    scale_fill_carto_d(palette = "SunsetDark", 
+                       type = "qualitative",
+                       name = nombresbien[i])
+  
+  print(graficos)
+} 
+
+#Balancear datos?
+```
+
+## Análisis Bivariado (relaciones)
+
+### Variables Explicativas Numéricas y Respuesta
 
 ```{r}
 #CORRELACION ENTRE PESOOVEJA, CCOVE, medidas, CON GAINSENAL
@@ -307,13 +353,12 @@ for (i in 1:length(num_vars)) {
   
 
 #AGREGAR RUIDO RANDOM?? Kruskal-Wallis
- 
 ```
 
 ```{r}
 
 
-cor_m <- datos_preparto |> select(all_of(num_vars)) |> cor(use = "complete.obs")
+cor_m <- datos_preparto |> dplyr::select(all_of(num_vars)) |> cor(use = "complete.obs")
 
 ggcorrplot(cor_m,
            hc.order = TRUE,
@@ -343,41 +388,13 @@ ggcorrplot(cor_m,
     panel.grid = element_blank()
   )
 
-cor_m
-#DETECTAR OUTLIER PARA UBRE!!
-
 det(cor_m) #no muy cero
 ```
 
-```{r}
-#Variables categóricas
-
-#NODULOS CHEQUEAR CUANTAS TIENEN
-#INDURACIONES IDEM. AUNQUE HAY UN POCO MAS
-#pocas no simet
-
-for (i in 1:length(cat_vars)) {
-  graficos <- ggplot(datos_preparto, aes(x= .data[[cat_vars[i]]], 
-                                        fill = .data[[cat_vars[i]]])) + 
-    geom_bar() +
-    theme_minimal() +
-    xlab(nombresbien[i]) +
-    theme(legend.position = "none") +
-    scale_fill_carto_d(palette = "SunsetDark", 
-                       type = "qualitative",
-                       name = nombresbien[i])
-  
-  print(graficos)
-} 
-```
-
-**#OJO DATOS NO HOMOGENEOS PREGUNTAR EL PARTES // SE PUEDEN PONDERAR O PENALIZAR LAS CATEGORIAS PARA BALANCEAR LOS DATOS**
-
-Relacion entre variables categoricas y la respuesta
+### Variables Explicativas Categóricas y Respuesta
 
 ```{r}
 
-paleta <- c("#fcde9c","#faa476","#f0746e","#e34f6f","#dc3977","#b9257a","#7c1d6f")
 
 for(i in 1:length(cat_vars)) {
    
@@ -386,10 +403,8 @@ for(i in 1:length(cat_vars)) {
                              fill = .data[[cat_vars[i]]] )) + 
     geom_boxplot() +
     ylab('Ganancia media de peso diario') +
-    xlab(nombresbien[i]) +
-    scale_fill_carto_d(palette = "SunsetDark", 
-                       type = "qualitative",
-                       name = nombresbien[i]) +
+    xlab(nombres_cat[i]) +
+    scale_fill_manual(values = paleta) +
     theme_minimal() +
     theme(legend.position = "none",
           axis.title.x = element_text(margin = margin(t = 20)),
@@ -398,25 +413,52 @@ for(i in 1:length(cat_vars)) {
   print(g)
 }
 
-
-
+#t.test jijijijiji 
 
 ```
 
-VER INTERACCIONES
+## Análisis Multivariado (Interacciones)
 
-#POTRERO Y TIPONAC INTERACCION!!!
+```{r}
 
-#EDAD Y CONDICION CORPORAL
+#NADA
+table(datos_preparto$Potrepari, datos_preparto$Tiponac)
+
+
+ggplot(datos_preparto, aes(x = Potrepari , y = Gainseñal, fill = Potrepari )) +
+  geom_boxplot() +
+  xlab('TipoNac') + 
+  ylab('Gain') +
+  theme_bw() +
+  theme(legend.position = 'bottom',
+        text = element_text(size = 15)) +
+  facet_grid(~Tiponac)
+
+
+datos_preparto |> 
+  group_by(Tiponac, Potrepari) |> 
+  summarise(media = mean(Gainseñal)) |> 
+  ggplot(aes(x = Potrepari, y = media, color = Tiponac)) +
+    geom_line(aes(group = Tiponac)) +
+    geom_point() +
+    theme_bw() +
+    theme(text = element_text(size = 15))
+
+table(datos_preparto$Edad, datos_preparto$CCove) 
+
+```
 
 ## Selección de Variables
 
 ```{r}
-library(grpreg)
-library(ggrepel)
+#Primer modelo aditivo con todo
+modelin <- lm(Gainseñal ~ ., data = datos_preparto)
 
+```
+
+```{r}
 #LASSO :0
-x_matrix <- model.matrix(Gainseñal ~ Edad + Partos + Pesove + CCove + LOTE + Tiponac + Potrepari + Sex + Nodu + Induru + Eco + Lagubre + Ancubre + Anchopez + Largopez + Peznum + Suspen + Separ + Ubicpez + Simet, data = datos_preparto)[, -1]
+x_matrix <- model.matrix(modelin)[, -1]
 
 y_vector <- datos_preparto$Gainseñal
 
@@ -483,6 +525,9 @@ ggplot(df_long,
   show.legend = FALSE)
 
 #Quise ponerles etiquetas para poder distinguirlas mejor en el grafico pero son demasiadas. Por lo menos se puede ver que Tiponac es la que llega ultima a un beta=0, o sea, necesita valores mas grandes de lambda para que LASSO no la seleccione. Para el resto es bastante dificil identificarlas
+
+#Variables con coeficiente 0 : Nodu, Lagubre, Anchopez, Largopez, Peznum, Suspen, Separ, Ubicpez
+#COMO FUNCIONA?? pq ahora elimina CCOve??
 ```
 
 ```{r}
@@ -515,7 +560,7 @@ df <- data.frame(
   BIC = c(BIC(modelo_aic), BIC(modelo_bic))
 )
 
-
+#QUEDARNOS LAS QUE QUEDEN EN AL MENOS UNO??
 ```
 
 ## Diagnostico
@@ -527,6 +572,8 @@ modelin <- lm(Gainseñal ~ ., data = datos_preparto)
 vif(modelin)
 #OJO GVIF VS AJUSTADO POR DF!!
 #No hay evidencia de multicolinealidad severa (>5)
+
+ncol(model.matrix(modelin)) - 1
 ```
 
 ## Primer modelo
