@@ -51,7 +51,7 @@ datos_preparto <- na.omit(datos_preparto)
 
 ```{r, warning =FALSE}
 
-datos$Tiponac[datos$Tiponac == "3"] <- 2 
+datos_preparto$Tiponac[datos_preparto$Tiponac == "3"] <- 2 
 
 datos_preparto <- datos_preparto |> 
   mutate(Edad = as.factor(Edad),
@@ -469,9 +469,21 @@ cv_grpreg <- cv.grpreg(x_matrix, y_vector, group = group_index, penalty = "grLas
 coef(cv_grpreg, s = "lambda.min")
 
 cv_grpreg$lambda.min
-
 #El lambda seleccionado es 0.009733694
 
+#probamos con otros lambdas, a ver si no se pierden tantas variables
+
+coef(cv_grpreg, s = 0.008)
+coef(cv_grpreg, s = 0.007)
+coef(cv_grpreg, s = 0.006)
+coef(cv_grpreg, s = 0.005)
+coef(cv_grpreg, s = 0.004)
+coef(cv_grpreg, s = 0.003)
+coef(cv_grpreg, s = 0.002)
+coef(cv_grpreg, s = 0.001)
+coef(cv_grpreg, s = 1e-4)
+coef(cv_grpreg, s = 1e-5)
+#me da todo 0 para estos lambdas no entiendo nadaaaaaaaaaaaasa
 #Variables con coeficiente 0 : Nodu, Lagubre, Anchopez, Largopez, Peznum, Suspen, Separ, Ubicpez
 
 #GRÁFICOS
@@ -511,18 +523,19 @@ ggplot(df_long,
        aes(x = lambda,
            y = valor,
            color = variable)) +
-  geom_line() +
+  geom_line() + 
   geom_hline(yintercept = 0) +
   theme_bw() +
-  labs(y = "beta") +
-  geom_text_repel(data = df_labels,
-  aes(label = variable),
-  direction = "y",
-  nudge_x = 0.02 * diff(range(df_long$lambda)),
-  box.padding = 0.4,
-  point.padding = 0.2,
-  segment.color = "grey50",
-  show.legend = FALSE)
+  labs(y = "beta") 
+#+
+#  geom_text_repel(data = df_labels,
+#  aes(label = variable),
+#  direction = "y",
+#  nudge_x = 0.02 * diff(range(df_long$lambda)),
+#  box.padding = 0.4,
+#  point.padding = 0.2,
+#  segment.color = "grey50",
+#  show.legend = FALSE)
 
 #Quise ponerles etiquetas para poder distinguirlas mejor en el grafico pero son demasiadas. Por lo menos se puede ver que Tiponac es la que llega ultima a un beta=0, o sea, necesita valores mas grandes de lambda para que LASSO no la seleccione. Para el resto es bastante dificil identificarlas
 
