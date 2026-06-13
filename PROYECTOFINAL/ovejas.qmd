@@ -13,6 +13,7 @@ library(ggplot2)
 library(rcartocolor)
 library(ggcorrplot)
 library(knitr)
+library(car)
 ```
 
 Cargamos datos
@@ -71,7 +72,9 @@ datos_preparto <- datos_preparto |>
 which(datos_preparto$Indupez == 1) #hay uno solo
 datos_preparto$Indupez[datos_preparto$Indupez == 1] 
 
-datos_preparto <- datos_preparto |> select(-PadCord, -PN, -Nodpez, -Indupez)
+datos_preparto <- datos_preparto |> dplyr::select(-PadCord, -PN, 
+                                           -Nodpez, -Indupez,
+                                           -IDM, -Momento, -Idcord)
 
 
 
@@ -342,6 +345,8 @@ ggcorrplot(cor_m,
 
 cor_m
 #DETECTAR OUTLIER PARA UBRE!!
+
+det(cor_m) #no muy cero
 ```
 
 ```{r}
@@ -404,8 +409,11 @@ VER INTERACCIONES
 
 #EDAD Y CONDICION CORPORAL
 
+## Selección de Variables 
+
 ```{r}
 library(grpreg)
+
 
 #LASSO :0
 x_matrix <- model.matrix(Gainseñal ~ Edad + Partos + Pesove + CCove + LOTE + Tiponac + Potrepari + Sex + Nodu + Induru + Eco + Lagubre + Ancubre + Anchopez + Largopez + Peznum + Suspen + Separ + Ubicpez + Simet, data = datos_preparto)[, -1]
@@ -419,6 +427,50 @@ cv_grpreg <- cv.grpreg(x_matrix, y_vector, group = group_index, penalty = "grLas
 coef(cv_grpreg, s = "lambda.min")
 
 #Variables con coeficiente 0 : Nodu, Lagubre, Anchopez, Largopez, Peznum, Suspen, Separ, Ubicpez
+```
+
+```{r}
+#Por alta cantidad de variables --> no ajustar todos los modelos posibles
+#Metodo basado en log verosimilitud // criterios de informacion
+
+#VA A EXPLOTAR TODO
+
+modelo_aic <- step(modelin, trace=0)
+
+modelo_bic <- step(modelin,
+                   k=log(nrow(datos_preparto)),
+                   trace=0)
+
+names(coef(modelo_aic))
+names(coef(modelo_bic))
+
+
+#ESTO NS QUE HACE
+
+AIC(modelo_aic)
+BIC(modelo_aic)
+
+AIC(modelo_bic)
+BIC(modelo_bic)
+
+df <- data.frame(
+  Modelo = c("AIC", "BIC"),
+  AIC = c(AIC(modelo_aic), AIC(modelo_bic)),
+  BIC = c(BIC(modelo_aic), BIC(modelo_bic))
+)
+
+
+```
+
+## Diagnostico 
+
+```{r}
+#factores de inflacion de varianza
+
+modelin <- lm(Gainseñal ~ ., data = datos_preparto)
+vif(modelin)
+#OJO GVIF VS AJUSTADO POR DF!!
+#No hay evidencia de multicolinealidad severa (>5)
 ```
 
 ## Primer modelo

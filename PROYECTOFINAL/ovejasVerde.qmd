@@ -15,8 +15,7 @@ library(ggplot2)
 library(rcartocolor)
 library(ggcorrplot)
 library(knitr)
-
-#
+library(car)
 ```
 
 #### Cargar datos
