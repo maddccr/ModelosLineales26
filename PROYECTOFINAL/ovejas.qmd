@@ -589,6 +589,38 @@ vif(modelin)
 ncol(model.matrix(modelin)) - 1
 ```
 
+```{r, message=FALSE}
+#normalidad
+library(qqplotr)
+residuos <- rstudent(modelin)
+n <- nrow(datos_preparto)
+
+z_i <- qnorm(seq(n)/(n+1))
+qq <- data.frame(teoricos = z_i,
+                 empiricos = sort(residuos))
+#qqplot
+qq |> ggplot(aes(sample = empiricos)) +
+  stat_qq_band(fill = 2) +
+  stat_qq_line(col = 2) +
+  stat_qq_point() +
+  xlab("Cuantiles teoricos")+
+  ylab("Cuantiles empiricos")
+
+#histograma
+qq |> ggplot(aes(x = empiricos, y=..density..)) +
+  geom_histogram(breaks = seq(-3, 3, 1), col = 'white') +
+  xlab('Residuos studentizados')
+
+#PdH
+# H0) Los errores son normales
+# H1) Los errores NO son normales
+
+shapiro.test(residuos)
+ks.test(residuos, 'pnorm')
+
+#todo indica que los errores son NORMALES 
+```
+
 ## Primer modelo
 
 ```{r}
