@@ -16,10 +16,13 @@ library(rcartocolor)
 library(ggcorrplot)
 library(knitr)
 
-
+#PARA DIAGNOSTICO
 library(car)
 library(grpreg)
 library(ggrepel) #esta que hace
+library(qqplotr)
+library(skedastic) 
+library(lmtest) 
 ```
 
 #### Data wrangling
@@ -305,7 +308,7 @@ datos_preparto |>
 
 ### Variables Explicativas Categóricas
 
-```{r, eval=FALSE}
+```{r}
 #Variables categóricas
 
 #NODULOS CHEQUEAR CUANTAS TIENEN
@@ -317,16 +320,22 @@ for (i in 1:length(cat_vars)) {
                                         fill = .data[[cat_vars[i]]])) + 
     geom_bar() +
     theme_minimal() +
-    xlab(nombresbien[i]) +
+    xlab(nombres_cat[i]) +
     theme(legend.position = "none") +
     scale_fill_carto_d(palette = "SunsetDark", 
                        type = "qualitative",
-                       name = nombresbien[i])
+                       name = nombres_cat[i])
   
   print(graficos)
 } 
 
 #Balancear datos?
+
+
+
+#JUNTAR UBIACION PEZONES // vertical horizontal --> no lateral
+#sep ubre --> marcada y mod --> con sep
+#suspension cuadrada y no
 ```
 
 ## Análisis Bivariado (relaciones)
@@ -578,6 +587,8 @@ df <- data.frame(
 
 ## Diagnostico
 
+### **Multicolinealidad** 
+
 ```{r}
 #factores de inflacion de varianza
 
@@ -589,9 +600,11 @@ vif(modelin)
 ncol(model.matrix(modelin)) - 1
 ```
 
+### Normalidad
+
 ```{r, message=FALSE}
 #normalidad
-library(qqplotr)
+
 residuos <- rstudent(modelin)
 n <- nrow(datos_preparto)
 
@@ -621,13 +634,30 @@ ks.test(residuos, 'pnorm')
 #todo indica que los errores son NORMALES 
 ```
 
+### Linealidad 
+
+```{r}
+datos_preparto$pred <- fitted(modelin)
+datos_preparto$residuos  <- residuals(modelin)
+
+for(i in c("Pesove",  "Lagubre",  "Ancubre", "Anchopez", "Largopez") ){
+  crPlot(modelin, variable = i, pch = 16)
+}
+
+for(i in cat_vars){
+  crPlot(modelin, variable = i, pch = 16)
+}
+
+#OJO USAR CCOVE AS FACTOR
+#NADA RARO
+```
+
 ### Homoscedasticidad
 
 ```{r}
 #residuos vs predichos
 
-datos_preparto$pred <- fitted(modelin)
-datos_preparto$t_i <- residuos
+datos_preparto$t_i <- residuos #studentizados
 
 ggplot(datos_preparto, aes(x = fitted(modelin), y = residuos)) +
   geom_point() +
@@ -696,9 +726,8 @@ BP <- n * R2
 #p_valor>0.05 no rechazo H0, asumimos homoscedasticidad!!
 
 #metodo largo (decidir cual usar)
-library(skedastic)
+
 breusch_pagan(modelin)
-library(lmtest)
 bptest(modelin)
 ```
 
@@ -795,7 +824,7 @@ anova(modelo_1) #que hace?
 ```{r}
 #ajustamos modelo segun variables significativas al 5%
 modelo_2 <- lm(
-  Gainseñal ~ Pesove + Tiponac + Sex,
+  Gainseñal ~ Pesove + Tiponac + Sex + LOTE + Edad + CCove,
   data = datos_preparto
 )
 
