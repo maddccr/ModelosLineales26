@@ -305,7 +305,7 @@ datos_preparto |>
 
 ### Variables Explicativas Categóricas
 
-```{r}
+```{r, eval=FALSE}
 #Variables categóricas
 
 #NODULOS CHEQUEAR CUANTAS TIENEN
