@@ -1,0 +1,183 @@
+---
+title: "entrega4"
+author: "madeee"
+format: html
+editor: visual
+---
+
+# Entrega 4 - Practico 4
+
+## Ejercicio 4
+
+Anteriormente se vio que la relación entre el $R^2$ y el estadístico $F$ está dada por:
+
+$$
+F =
+\frac{R^2}{1-R^2}
+\cdot
+\frac{n-k-1}{k-1}
+$$
+
+Si la definición de $R^2$ es:
+
+$$
+R^2=
+\frac{\sum_{i=1}^{n}(\hat y_i-\bar y)^2}
+{\sum_{i=1}^{n}(y_i-\bar y)^2}
+$$
+
+Obtenga que el estadístico $F$ del ANOVA es:
+
+$$
+F=
+\frac{
+\sum_{j=1}^{J} n_j(\bar y_j-\bar y)^2
+}{
+k-1
+}
+\Bigg/
+\hat\sigma^2
+$$
+
+**Nota:** Tenga en cuenta que al compararse $J$ grupos, el modelo cuenta con $k-1$ coeficientes y que los valores $\hat y_i$ son iguales al promedio de cada grupo $\bar y_j$.
+
+Por definición tenemos que
+
+$$
+R^2=\frac{SCExp}{SCT},
+$$ Con $SCT = SCExp + SCRes$. Por lo que otra forma de expresar el estadistico $F$ es:
+
+$$
+F
+=
+\frac{SCExp/(k-1)}
+{SCRes/(n-k-1)}
+$$ Ahora buscaremos desarrollar las expresiones de $SCExp$ y $SCRes$
+
+Sabemos que:
+
+$$
+SCExp
+=
+\sum_{i=1}^{n}
+(\hat y_i-\bar y)^2.
+$$ Por letra tenemos que en el ANOVA de 1 vía donde se comparan J grupo dentro del grupo $j$ se cumpe que $\hat y_i = \bar y_j$. Ademas sea $n_j$ la cantidad de observaciones en el grupo $j$, con $n = \sum_{j=1}^J n_j$.
+
+$$
+\sum_{i=1}^{n}
+(\hat y_i-\bar y)^2 = \sum_{j=1}^J \sum_{i=1}^{n_j} (\hat y_i-\bar y)^2 = \sum_{j=1}^J \sum_{i=1}^{n_j} (\bar y_j-\bar y)^2 = \sum_{j=1}^J n_j(\bar y_j-\bar y)^2 
+$$ Por otro lado, por desarrollos anteriores, tenemos que:
+
+$$
+\hat\sigma^2
+=
+\frac{SCRes}{n-k-1} \implies SCRes
+=
+(n-k-1)\hat\sigma^2
+$$ Juntando todo:
+
+$$
+F
+=
+\frac{\sum_{j=1}^J n_j(\bar y_j-\bar y)^2/(k-1)}
+{(n-k-1)\hat\sigma^2/(n-k-1)} = \frac{\sum_{j=1}^J n_j(\bar y_j-\bar y)^2/(k-1)}
+{\hat\sigma^2}
+$$
+
+## Ejercicio 6
+
+Se recopilaron datos sobre la actividad de la enzima *mannosa-6-fosfato* *isomerasa* y tres genotipos en el crustáceo anfípodo *Platorchestia platensis*. El objetuvo del análisis es determinar si el efecto de los genotipos sobre la actividad enzimática difiere en ambos sexos. Los datos correspondientes a este estudio pueden encontrarse en el archivo actividad *enzimatica.xlsx.*
+
+```{r, warning = FALSE, message=FALSE}
+library(tidyverse)
+library(emmeans)
+```
+
+```{r}
+datos <- readxl::read_xlsx("actividad_enzimatica.xlsx")
+str(datos)
+
+#HACER FACTORES
+datos <- datos |> mutate(across(where(is.character), as.factor))
+str(datos)
+```
+
+1.  Realice un gráfico que le permita visualizar la distribución de la actividad enzimática en función de los 2 factores
+
+```{r}
+
+#Distribuciones
+ggplot(datos, aes(x = genotipo, y = act_enz, color = genotipo))+
+  geom_boxplot() +
+  labs( title = "Distribución de la actividad enzimática según genotipo y sexo",
+    x = "Genotipo",
+    y = "Actividad enzimática") +
+  theme_minimal()+
+  theme(legend.position = "none",
+        panel.grid.minor = element_blank()) +
+  facet_wrap(~sexo)
+
+```
+
+En el primer gráfico, a simple vista, no se aprecia un patrón marcado que indique que un genotipo presenta sistemáticamente una actividad enzimática mayor que los demás, ni tampoco diferencias pronunciadas entre hembras y machos. Las medianas segun genotipo en ambos sexos son similares, la diferencia visual mas notables en la mayor variabilidad de fs en el sexo F vs una mayor concetración en sexo M. Estas diferencias pueden deberser al azar muestral, sobretodo al tratarse de un n chico.
+
+```{r}
+datos |> count(genotipo, sexo)
+```
+
+```{r}
+#Grafico de interaccion
+datos |> 
+  group_by(genotipo, sexo) |> 
+  summarise(media = mean(act_enz), .groups = "drop") |> 
+  ggplot(aes(x = genotipo, y = media, color = sexo)) +
+    geom_line(aes(group = sexo)) +
+    geom_point() +
+  labs(title = "Gráfico de interacción",
+    subtitle = "Media de actividad enzimática según genotipo y sexo",
+    x = "Genotipo",
+    y = "Media de actividad enzimática",
+    color = "Sexo") +
+    theme_minimal() +
+    theme(text = element_text(size = 15))
+```
+
+El gráfico sugiere la posible existencia de una interacción entre sexo y genotipo, dado que las tendencias observadas para ambos sexos no son paralelas e incluso parecen cruzarse. Sin embargo, esta evidencia visual no es concluyente, por lo que resulta necesario realizar un análisis de varianza de dos vías con interacción para determinar si dicho efecto es estadísticamente significativo.
+
+2.Ajuste un modelo de análisis de varianza a 2 vías con interacción
+
+```{r}
+modelin <- lm(act_enz ~ sexo*genotipo, datos)
+#sexo*genotipo = sexo + genotipo + sexo:genotipo
+```
+
+3.  Empleando el estadístico correspondiente decida si la interacción es significativa. Utilice un nivel de significación de α = 0, 10.
+
+```{r}
+anova(modelin)
+```
+
+Para esta prueba con el estadistico F las hipótesis son H0: no existe interaccion entre genotipo y sexo y H1: existe interaccion. En nuestro caso p-valor = 0.6 \> 0.1. Por lo tanto, no se rechaza H0 y se concluye que no existe evidencia suficiente para afirmar que el efecto del genotipo sobre la actividad enzimática difiere entre sexos. A partir de esta conclusión, los efectos principales pueden interpretarse de forma global.
+
+4.  A partir de la conclusión obtenida en el punto anterior, evalúe la diferencia entre genotipos de forma global o a la interna de cada sexo.
+
+```{r}
+#por no ser signif sacamos la interaccion
+modelin2 <- update(modelin, .~ . -sexo:genotipo)
+anova(modelin2)
+
+```
+
+Para el modelo aditivo, sin interaccion, los p-valores de ambas variables son \> 0.1 por lo que no presentan efectos significativos sobre la actividad enzimática. En consecuencia, no se encontraron diferencias estadísticamente significativas en la actividad de la enzima entre los distintos genotipos ni entre machos y hembras.
+
+```{r}
+emm <- emmeans(modelin2, ~ genotipo)
+
+ggplot(as.data.frame(emm),
+       aes(x = genotipo, y = emmean, color = genotipo)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = lower.CL,
+                    ymax = upper.CL),
+                width = 0.15) +
+  theme_minimal()
+```
