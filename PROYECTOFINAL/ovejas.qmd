@@ -261,19 +261,19 @@ for (i in 1:length(num_cont)) {
 library(patchwork)
 
 g1 <- ggplot(datos_preparto, aes(y = CCove)) +
-  geom_boxplot(color = "#faa476", size = 0.6) +
+  geom_boxplot(fill = "#faa476", size = 0.6) +
   labs(x = "Condición corporal de la oveja",
        y="") +
   theme_minimal()
 
 g2 <- ggplot(datos_preparto, aes(y = Lagubre)) +
-  geom_boxplot(color = "#e34f6f", size = 0.6) +
+  geom_boxplot(fill = "#e34f6f", size = 0.6) +
   labs(x = "Largo de ubre (cm)",
        y="") +
   theme_minimal()
 
 g3 <- ggplot(datos_preparto, aes(y = Largopez)) +
-  geom_boxplot(color = "#7c1d6f", size = 0.6) +
+  geom_boxplot(fill = "#7c1d6f", size = 0.6) +
   labs(x = "Largo del pezón (cm)",
        y="") +
   theme_minimal()
@@ -619,6 +619,161 @@ shapiro.test(residuos)
 ks.test(residuos, 'pnorm')
 
 #todo indica que los errores son NORMALES 
+```
+
+### Homoscedasticidad
+
+```{r}
+#residuos vs predichos
+
+datos_preparto$pred <- fitted(modelin)
+datos_preparto$t_i <- residuos
+
+ggplot(datos_preparto, aes(x = fitted(modelin), y = residuos)) +
+  geom_point() +
+  geom_hline(yintercept = 0) +
+  xlab("Valores ajustados") +
+  ylab("Residuos studentizados")
+```
+
+```{r}
+#residuos vs x_j num
+
+for(i in 1:length(num_vars2)) {
+
+  g <- ggplot(datos_preparto,
+              aes(x = .data[[num_vars2[i]]],
+                  y = residuos)) +
+    geom_point(color = "#7c1d6f") +
+    geom_hline(yintercept = 0,
+               linetype = "dashed") +
+    theme_minimal() +
+    xlab(num_vars2[i]) +
+    ylab("Residuos studentizados")
+
+  print(g)
+
+}
+```
+
+```{r}
+#residuos vs x_j cat
+for(i in 1:length(cat_vars)) {
+
+  g <- ggplot(datos_preparto,
+              aes(x = .data[[cat_vars[i]]],
+                  y = residuos)) +
+    geom_boxplot(fill = "#faa476") +
+    theme_minimal() +
+    xlab(nombres_cat[i]) +
+    ylab("Residuos studentizados")
+
+  print(g)
+
+}
+```
+
+```{r}
+#Test de hipotesis
+# H0) E(eps^2_i) = sigma^2
+# H1) E(eps^2_i) = sigma^2 * h(X_1, X_2, ..., X_k)
+
+# elevamos los residuoas al cuadrado y ajustamos la regresion auxiliar
+mod_aux <- lm((residuals(modelin))^2 ~ Edad + Partos + Pesove + CCove + LOTE + Tiponac +
+                Potrepari + Sex + Nodu + Induru + Eco + Lagubre +
+                Ancubre + Anchopez + Largopez + Peznum + Suspen +
+                Separ + Ubicpez + Simet,
+              data = datos_preparto)
+
+# y calculamos el valor del estadistico BP
+n <- nrow(mod_aux$model)
+R2 <- summary(mod_aux)$r.squared
+BP <- n * R2
+
+# el p-valor es:
+1 - pchisq(BP, length(coef(mod_aux)) - 1)
+
+#p_valor>0.05 no rechazo H0, asumimos homoscedasticidad!!
+
+#metodo largo (decidir cual usar)
+library(skedastic)
+breusch_pagan(modelin)
+library(lmtest)
+bptest(modelin)
+```
+
+### Datos atipicos/influyentes
+
+```{r}
+#atipicos
+df_res <- data.frame(
+  i = 1:length(residuos),
+  t_i = residuos
+)
+
+ggplot(df_res, aes(x = i, y = t_i)) +
+  geom_point() +
+  geom_hline(yintercept = c(-2,2),
+             color = "red",
+             linetype = "dashed") +
+  xlab("Observación") +
+  ylab("Residuo studentizado")
+```
+
+```{r}
+# medidas de influencia
+h_i <- influence(modelin)$hat
+
+df <- data.frame(
+  i = 1:nrow(datos_preparto),
+  h_i = h_i
+)
+
+# Leverage
+ggplot(df, aes(x = i, y = h_i)) +
+  geom_point() +
+  geom_segment(aes(xend = i,
+                   y = 0,
+                   yend = h_i)) +
+  geom_hline(
+    yintercept = 2*length(coef(modelin))/nrow(datos_preparto),
+    color = "red",
+    linetype = "dashed"
+  ) +
+  ylab("Leverage")
+```
+
+```{r}
+# Distancia de Cook
+D_i <- cooks.distance(modelin)
+
+df$D_i <- D_i
+
+ggplot(df, aes(x = i, y = D_i)) +
+  geom_point() +
+  geom_segment(aes(xend = i,
+                   y = 0,
+                   yend = D_i)) +
+  geom_hline(
+    yintercept = 4/nrow(datos_preparto),
+    color = "red",
+    linetype = "dashed"
+  ) +
+  ylab("Distancia de Cook")
+```
+
+```{r}
+#Observaciones con alto leverage
+which(h_i > 0.352)
+
+#Observaciones influyentes según Distancia de Cook
+which(D_i > 0.0252)
+
+#Observaciones atipicas
+which(abs(rstudent(modelin)) > 2)
+
+
+#43 aparece en las tres, principal observacion influyente, evaluar
 ```
 
 ## Primer modelo
