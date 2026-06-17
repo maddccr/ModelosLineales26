@@ -19,7 +19,7 @@ library(knitr)
 #PARA DIAGNOSTICO
 library(car)
 library(grpreg)
-library(ggrepel) #esta que hace
+library(ggrepel) #esta es para ponerles etiquetas a las obs en los graficos
 library(qqplotr)
 library(skedastic) 
 library(lmtest) 
@@ -467,6 +467,7 @@ modelin <- lm(Gainseñal ~ ., data = datos_preparto)
 
 ```{r}
 #LASSO :0
+set.seed(123)
 x_matrix <- model.matrix(modelin)[, -1]
 
 y_vector <- datos_preparto$Gainseñal
@@ -478,7 +479,6 @@ cv_grpreg <- cv.grpreg(x_matrix, y_vector, group = group_index, penalty = "grLas
 coef(cv_grpreg, s = "lambda.min")
 
 cv_grpreg$lambda.min
-#El lambda seleccionado es 0.009733694
 
 #probamos con otros lambdas, a ver si no se pierden tantas variables
 
@@ -492,8 +492,7 @@ coef(cv_grpreg, s = 0.002)
 coef(cv_grpreg, s = 0.001)
 coef(cv_grpreg, s = 1e-4)
 coef(cv_grpreg, s = 1e-5)
-#me da todo 0 para estos lambdas no entiendo nadaaaaaaaaaaaasa
-#Variables con coeficiente 0 : Nodu, Lagubre, Anchopez, Largopez, Peznum, Suspen, Separ, Ubicpez
+#con este seed solo queda tiponac
 
 #GRÁFICOS
 #ECM de validaciones cruzadas para valores de log de lambda
@@ -548,8 +547,6 @@ ggplot(df_long,
 
 #Quise ponerles etiquetas para poder distinguirlas mejor en el grafico pero son demasiadas. Por lo menos se puede ver que Tiponac es la que llega ultima a un beta=0, o sea, necesita valores mas grandes de lambda para que LASSO no la seleccione. Para el resto es bastante dificil identificarlas
 
-#Variables con coeficiente 0 : Nodu, Lagubre, Anchopez, Largopez, Peznum, Suspen, Separ, Ubicpez
-#COMO FUNCIONA?? pq ahora elimina CCOve??
 ```
 
 ```{r}
@@ -587,7 +584,7 @@ df <- data.frame(
 
 ## Diagnostico
 
-### **Multicolinealidad** 
+### **Multicolinealidad**
 
 ```{r}
 #factores de inflacion de varianza
@@ -634,7 +631,7 @@ ks.test(residuos, 'pnorm')
 #todo indica que los errores son NORMALES 
 ```
 
-### Linealidad 
+### Linealidad
 
 ```{r}
 datos_preparto$pred <- fitted(modelin)
