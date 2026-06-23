@@ -14,7 +14,7 @@ library(readxl)
 library(tidyverse)
 library(ggcorrplot)
 library(knitr)
-library(patchwork)
+library(patchwork) 
 
 #PARA DIAGNOSTICO
 library(car)
