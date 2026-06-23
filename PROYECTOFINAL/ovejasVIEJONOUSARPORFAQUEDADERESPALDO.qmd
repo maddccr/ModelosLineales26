@@ -2,26 +2,26 @@
 title: "ovejas"
 format: html
 editor: visual
-author: Madeline Cecere, Florencia Pricolli, Ariana Leal
 ---
 
-## MODELOS LINEALES - PROYECTO FINAL
+## 
 
 #### Librerías y paquetes
 
 ```{r, warning =FALSE, message=FALSE}
 library(readxl)
 library(tidyverse)
+library(rcartocolor) #???
 library(ggcorrplot)
 library(knitr)
-library(patchwork)
 
 #PARA DIAGNOSTICO
 library(car)
 library(grpreg)
-library(ggrepel) 
+library(ggrepel) #esta es para ponerles etiquetas a las obs en los graficos
 library(qqplotr)
 library(skedastic) 
+library(lmtest) #???
 ```
 
 #### Data wrangling
@@ -30,19 +30,22 @@ library(skedastic)
 
 ```{r}
 datos <- read_excel("datosoveja.xlsx", sheet = "Datos hasta señalada", na = "." )
-#str(datos)
+str(datos)
 
 datos_preparto <- datos |> filter( Momento == "Preparto") 
+#momento elegido para el primer analisis
+
 ```
 
 **Datos faltantes (NAs)**
 
 ```{r}
-nrow(na.omit(datos_preparto)) #159 de 174 
+nrow(na.omit(datos_preparto)) #159 174 yipii 
+
 nrow(na.omit(datos))
 
+nrow(na.omit(datos |> filter( Momento == "Preencarnerada") )) #57
 
-#Se eliminan las observaciones con NAs
 datos_preparto <- na.omit(datos_preparto)
 ```
 
@@ -50,19 +53,8 @@ datos_preparto <- na.omit(datos_preparto)
 
 ```{r, warning =FALSE}
 
-#datos_preparto$Tiponac[datos_preparto$Tiponac == "3"] <- 2 
+datos_preparto$Tiponac[datos_preparto$Tiponac == "3"] <- 2 
 
-#Unificacion de categorias por desbalance (sin o con defecto ya no por escala)
-
-datos_preparto <- datos_preparto |> 
- mutate(
-    Ubicpez = if_else(Ubicpez == 3, 2, Ubicpez),
-    Separ = if_else(Separ == 1,2, Separ),
-    Suspen = if_else(Suspen == 3, 1, Suspen),
-    Tiponac = ifelse(Tiponac == 3, 2, Tiponac)
-  )
-
-#Transformamos las variables categoricas en factor
 datos_preparto <- datos_preparto |> 
   mutate(Edad = as.factor(Edad),
          Partos = as.factor(Partos),
@@ -86,15 +78,18 @@ datos_preparto <- datos_preparto |>
          Simet = as.factor(Simet) ) 
 
 #str(datos_preparto)
-
-#Variables con desbalance extremo
 which(datos_preparto$Indupez == 1) #hay uno solo
+datos_preparto$Indupez[datos_preparto$Indupez == 1] 
 which(datos_preparto$Nodpez == 1) #no hay
 
 #Eliminamos variables no relevantes para el analisis o por falta extrema de homegenidad en categorias
-datos_preparto <- datos_preparto |> 
-  dplyr::select(-PadCord, -PN, -Nodpez, -Indupez, -IDM, -Momento, -Idcord)
+datos_preparto <- datos_preparto |> dplyr::select(-PadCord, -PN, 
+                                           -Nodpez, -Indupez,
+                                           -IDM, -Momento, -Idcord)
 
+
+
+#nrow(datos_preparto |> filter(if_any(everything(), ~ !is.na(.x))) )
 ```
 
 ```{r}
@@ -110,21 +105,23 @@ datos_preparto <- datos_preparto |>
     Induru = fct_recode(Induru,"Ausencia" = "0","Presencia" = "1"),
     Eco = fct_recode(Eco,"Normal" = "0","Alteración" = "1"),
     Peznum = fct_recode(Peznum, "Ausencia" = "0","Presencia" = "1"),
-    Suspen = fct_recode(Suspen,"No cuadrada" = "1",
-                               "Cuadrada" = "2"),
-    Separ = fct_recode(Separ, "Con" = "2",
+    Suspen = fct_recode(Suspen,"Ancha" = "1",
+                               "Cuadrada" = "2",
+                               "Pendulada" = "3"),
+    Separ = fct_recode(Separ,"Marcada" = "1",
+                             "Moderada" = "2",
                              "Sin" = "3"),
     Ubicpez = fct_recode(Ubicpez, "Lateral" = "1",
-                                  "No lateral" = "2"),
+                                  "Vertical" = "2",
+                                  "Horizontal" = "3"),
     Simet = fct_recode(Simet, "Simétrica" = "0", "No simétrica" = "1")
   )
 ```
 
 ```{r}
-#Para graficar
+#Para graficar variables categoricas
 cat_vars <- names(Filter(is.factor, datos_preparto))
-num_vars <- datos_preparto |> dplyr::select(where(is.numeric)) |> names() |> 
-  setdiff("Gainseñal")
+num_vars <- datos_preparto |> dplyr::select(where(is.numeric)) |> names()
 
 nombres_cat <- c("Edad (cronología dentaria)", 
                  "Número de partos",
@@ -145,13 +142,9 @@ nombres_cat <- c("Edad (cronología dentaria)",
 nombres_num <- c("Peso de la oveja",
                  "Condición corporal de la oveja",
                  "Largo de ubre (cm)",
-                 "Ancho de ubre (cm)",
-                 "Ancho del pezon (cm)",
-                 "Largo pezon (cm)")
+                 "Ancho de ubre (cm)")
 
 paleta <- c("#fcde9c","#faa476","#f0746e","#e34f6f","#dc3977","#b9257a","#7c1d6f")
-
-num_vars
 ```
 
 ## Análisis Univariado
@@ -162,15 +155,7 @@ num_vars
 #Densidad
 
 ggplot(datos_preparto, aes(x = Gainseñal)) +
-  
-  geom_histogram(aes(y = after_stat(density)),
-                   fill = "grey",
-                   color = "white",
-                   bins = 15,
-                   alpha = 0.8) +
-  
-  geom_density(fill = "#dc3977", alpha = 0.6, color = NA) +
-  
+  geom_density(fill = "#b9257a", alpha = 0.4, color = NA) +
   geom_vline(xintercept = mean(datos_preparto$Gainseñal),
              linetype = "dashed",
              linewidth = 1) +
@@ -186,24 +171,63 @@ ggplot(datos_preparto, aes(x = Gainseñal)) +
        title = "Distribución de la ganancia media de peso diario",
        subtitle = "(Nacimiento hasta señalada)")
 
-#ACLARAR UNIDADES 
+#quitar el borde
 ```
 
 ### Variables Explicativas Numéricas
 
 ```{r}
-#Numericas continuas
-num_vars2 <- setdiff(num_vars, c("CCove", "Anchopez"))
+
+num_vars2 <- setdiff(num_vars, "Gainseñal")
+
+#variables numericas discretas
+num_disc <- c("CCove",
+              "Anchopez")
+
+nombres_disc <- c("Condición corporal de la oveja",
+                  "Ancho del pezón (cm)")
+
+#variables numericas continuas
+num_cont <- c("Pesove",
+              "Lagubre",
+              "Ancubre",
+              "Largopez")
 
 nombres_cont <- c("Peso de la oveja",
                  "Largo de ubre (cm)",
                  "Ancho de ubre (cm)",
                  "Largo del pezón (cm)")
-#Histogramas
-for (i in 1:length(num_vars2)) {
+```
+
+```{r}
+#Diagrama de barras
+for (i in 1:length(num_disc)) {
   
   graficos <- ggplot(datos_preparto,
-                     aes(x = .data[[num_vars2[i]]])) +
+                     aes(x = factor(.data[[num_disc[i]]]))) +
+    
+    geom_bar(fill = "#e34f6f",
+             color = "white",
+             alpha = 0.8) +
+    
+    theme_minimal() +
+    xlab(nombres_disc[i]) +
+    ylab("Frecuencia")
+  
+  print(graficos)
+  
+}
+
+
+#FALTAN LOS TITULOS
+```
+
+```{r}
+#Histograma
+for (i in 1:length(num_cont)) {
+  
+  graficos <- ggplot(datos_preparto,
+                     aes(x = .data[[num_cont[i]]])) +
     
     geom_histogram(aes(y = after_stat(density)),
                    fill = "grey",
@@ -226,38 +250,35 @@ for (i in 1:length(num_vars2)) {
 ```
 
 ```{r}
-#Numericas discretas
+library(patchwork)
 
-num_disc <- c("CCove",
-              "Anchopez")
+g1 <- ggplot(datos_preparto, aes(y = CCove)) +
+  geom_boxplot(fill = "#faa476", size = 0.6) +
+  labs(x = "Condición corporal de la oveja",
+       y="") +
+  theme_minimal()
 
-nombres_disc <- c("Condición corporal de la oveja",
-                  "Ancho del pezón (cm)")
+g2 <- ggplot(datos_preparto, aes(y = Lagubre)) +
+  geom_boxplot(fill = "#e34f6f", size = 0.6) +
+  labs(x = "Largo de ubre (cm)",
+       y="") +
+  theme_minimal()
 
-#Diagrama de barras
-for (i in 1:length(num_disc)) {
-  
-  graficos <- ggplot(datos_preparto,
-                     aes(x = factor(.data[[num_disc[i]]]))) +
-    
-    geom_bar(fill = "#e34f6f",
-             color = "white",
-             alpha = 0.8) +
-    
-    theme_minimal() +
-    xlab(nombres_disc[i]) +
-    ylab("Frecuencia")
-  
-  print(graficos)
-  
-}
+g3 <- ggplot(datos_preparto, aes(y = Largopez)) +
+  geom_boxplot(fill = "#7c1d6f", size = 0.6) +
+  labs(x = "Largo del pezón (cm)",
+       y="") +
+  theme_minimal()
+
+g1 + g2 + g3
+
+#ELIMINAR NUMERO DE ABAJOOOOOOOOOOOOOOOOOO
+#TITULO
 ```
-
-#### Medidas de resumen
 
 ```{r}
 datos_preparto |>
-  dplyr::select(all_of( c("Gainseñal", num_vars) )) |>
+  dplyr::select(all_of(num_vars)) |>
   pivot_longer(
     everything(),
     names_to = "Variable",
@@ -273,7 +294,16 @@ datos_preparto |>
   ) |>
   kable(digits = 2)
 
-#PONER GAIN DE PRIMERA!!!!
+
+
+datos_preparto |>
+  summarise(
+    Media = mean(Gainseñal),
+    Mediana = median(Gainseñal),
+    Desvio = sd(Gainseñal),
+    Minimo = min(Gainseñal),
+    Maximo = max(Gainseñal)
+  ) |> kable()
 ```
 
 ### Variables Explicativas Categóricas
@@ -281,7 +311,9 @@ datos_preparto |>
 ```{r}
 #Variables categóricas
 
-#HACER EN % Y PANELADO (CREO Q CON UN PIVOT LONGER)
+#NODULOS CHEQUEAR CUANTAS TIENEN
+#INDURACIONES IDEM. AUNQUE HAY UN POCO MAS
+#pocas no simet
 
 for (i in 1:length(cat_vars)) {
   graficos <- ggplot(datos_preparto, aes(x= .data[[cat_vars[i]]], 
@@ -296,6 +328,14 @@ for (i in 1:length(cat_vars)) {
   
   print(graficos)
 } 
+
+#Balancear datos?
+
+
+
+#JUNTAR UBIACION PEZONES // vertical horizontal --> no lateral
+#sep ubre --> marcada y mod --> con sep
+#suspension cuadrada y no
 ```
 
 ## Análisis Bivariado (relaciones)
@@ -303,6 +343,7 @@ for (i in 1:length(cat_vars)) {
 ### Variables Explicativas Numéricas y Respuesta
 
 ```{r}
+#CORRELACION ENTRE PESOOVEJA, CCOVE, medidas, CON GAINSENAL
 
 for (i in 1:length(num_vars)) {
   
@@ -323,6 +364,7 @@ for (i in 1:length(num_vars)) {
 ```
 
 ```{r}
+
 
 cor_m <- datos_preparto |> dplyr::select(all_of(num_vars)) |> cor(use = "complete.obs")
 
@@ -361,6 +403,7 @@ det(cor_m) #no muy cero
 
 ```{r}
 
+
 for(i in 1:length(cat_vars)) {
    
   g <- ggplot(datos_preparto, aes(x = .data[[cat_vars[i]]], 
@@ -377,9 +420,41 @@ for(i in 1:length(cat_vars)) {
   
   print(g)
 }
+
+#t.test jijijijiji 
+
 ```
 
 ## Análisis Multivariado (Interacciones)
+
+```{r}
+
+#NADA
+table(datos_preparto$Potrepari, datos_preparto$Tiponac)
+
+
+ggplot(datos_preparto, aes(x = Potrepari , y = Gainseñal, fill = Potrepari )) +
+  geom_boxplot() +
+  xlab('TipoNac') + 
+  ylab('Gain') +
+  theme_bw() +
+  theme(legend.position = 'bottom',
+        text = element_text(size = 15)) +
+  facet_grid(~Tiponac)
+
+
+datos_preparto |> 
+  group_by(Tiponac, Potrepari) |> 
+  summarise(media = mean(Gainseñal)) |> 
+  ggplot(aes(x = Potrepari, y = media, color = Tiponac)) +
+    geom_line(aes(group = Tiponac)) +
+    geom_point() +
+    theme_bw() +
+    theme(text = element_text(size = 15))
+
+table(datos_preparto$Edad, datos_preparto$CCove) 
+
+```
 
 ## Selección de Variables
 
@@ -390,7 +465,6 @@ modelin <- lm(Gainseñal ~ ., data = datos_preparto)
 ```
 
 ```{r}
-{r}
 #LASSO :0
 set.seed(123)
 x_matrix <- model.matrix(modelin)[, -1]
@@ -471,9 +545,8 @@ ggplot(df_long,
 #  show.legend = FALSE)
 
 #Quise ponerles etiquetas para poder distinguirlas mejor en el grafico pero son demasiadas. Por lo menos se puede ver que Tiponac es la que llega ultima a un beta=0, o sea, necesita valores mas grandes de lambda para que LASSO no la seleccione. Para el resto es bastante dificil identificarlas
-```
 
-SERIAMENTE PENSANDO USAR EL BACKWARD NOMAS
+```
 
 ```{r}
 #Por alta cantidad de variables --> no ajustar todos los modelos posibles
@@ -508,24 +581,23 @@ df <- data.frame(
 #QUEDARNOS LAS QUE QUEDEN EN AL MENOS UNO??
 ```
 
-## Diagnóstico
+## Diagnostico
 
 ### **Multicolinealidad**
 
 ```{r}
-#Factores de inflacion de varianza
-#GVIF ajustado por tener variables categoricas
+#factores de inflacion de varianza
 
 modelin <- lm(Gainseñal ~ ., data = datos_preparto)
 vif(modelin)
+#OJO GVIF VS AJUSTADO POR DF!!
+#No hay evidencia de multicolinealidad severa (>5)
 
-#df 
 ncol(model.matrix(modelin)) - 1
+
 ```
 
 ```{r}
-#PREGUNTAR
-
 #KAPPA
 
 X <- model.matrix(modelin) #OJO ESTA MATRIZ TIENE INTERCEPTO
@@ -560,6 +632,11 @@ qq |> ggplot(aes(sample = empiricos)) +
   xlab("Cuantiles teoricos")+
   ylab("Cuantiles empiricos")
 
+#histograma
+qq |> ggplot(aes(x = empiricos, y=..density..)) +
+  geom_histogram(breaks = seq(-3, 3, 1), col = 'white') +
+  xlab('Residuos studentizados')
+
 #PdH
 # H0) Los errores son normales
 # H1) Los errores NO son normales
@@ -576,10 +653,16 @@ ks.test(residuos, 'pnorm')
 datos_preparto$pred <- fitted(modelin)
 datos_preparto$residuos  <- residuals(modelin)
 
-for(i in num_vars2){
+for(i in c("Pesove",  "Lagubre",  "Ancubre", "Anchopez", "Largopez") ){
   crPlot(modelin, variable = i, pch = 16)
 }
 
+for(i in cat_vars){
+  crPlot(modelin, variable = i, pch = 16)
+}
+
+#OJO USAR CCOVE AS FACTOR
+#NADA RARO
 ```
 
 ### Homoscedasticidad
@@ -612,11 +695,12 @@ for(i in 1:length(num_vars2)) {
     ylab("Residuos studentizados")
 
   print(g)
+
 }
 ```
 
 ```{r}
-#residuos vs x_j cat 
+#residuos vs x_j cat
 for(i in 1:length(cat_vars)) {
 
   g <- ggplot(datos_preparto,
@@ -628,7 +712,8 @@ for(i in 1:length(cat_vars)) {
     ylab("Residuos studentizados")
 
   print(g)
-} 
+
+}
 ```
 
 ```{r}
@@ -636,7 +721,27 @@ for(i in 1:length(cat_vars)) {
 # H0) E(eps^2_i) = sigma^2
 # H1) E(eps^2_i) = sigma^2 * h(X_1, X_2, ..., X_k)
 
+# elevamos los residuoas al cuadrado y ajustamos la regresion auxiliar
+mod_aux <- lm((residuals(modelin))^2 ~ Edad + Partos + Pesove + CCove + LOTE + Tiponac +
+                Potrepari + Sex + Nodu + Induru + Eco + Lagubre +
+                Ancubre + Anchopez + Largopez + Peznum + Suspen +
+                Separ + Ubicpez + Simet,
+              data = datos_preparto)
+
+# y calculamos el valor del estadistico BP
+n <- nrow(mod_aux$model)
+R2 <- summary(mod_aux)$r.squared
+BP <- n * R2
+
+# el p-valor es:
+1 - pchisq(BP, length(coef(mod_aux)) - 1)
+
+#p_valor>0.05 no rechazo H0, asumimos homoscedasticidad!!
+
+#metodo largo (decidir cual usar)
+
 breusch_pagan(modelin)
+bptest(modelin)
 ```
 
 ### Datos atipicos/influyentes
@@ -655,6 +760,29 @@ ggplot(df_res, aes(x = i, y = t_i)) +
              linetype = "dashed") +
   xlab("Observación") +
   ylab("Residuo studentizado")
+```
+
+```{r}
+# medidas de influencia
+h_i <- influence(modelin)$hat
+
+df <- data.frame(
+  i = 1:nrow(datos_preparto),
+  h_i = h_i
+)
+
+# Leverage
+ggplot(df, aes(x = i, y = h_i)) +
+  geom_point() +
+  geom_segment(aes(xend = i,
+                   y = 0,
+                   yend = h_i)) +
+  geom_hline(
+    yintercept = 2*length(coef(modelin))/nrow(datos_preparto),
+    color = "red",
+    linetype = "dashed"
+  ) +
+  ylab("Leverage")
 ```
 
 ```{r}
@@ -690,28 +818,43 @@ which(abs(rstudent(modelin)) > 2)
 #43 aparece en las tres, principal observacion influyente, evaluar
 ```
 
-## Significaciones del Primer modelo
+## Primer modelo
 
 ```{r}
 #primer modelo para ver significacion de las variables
-summary(modelin)
-Anova(modelin) #que hace?
-```
-
-```{r}
-#ajustamos modelo segun variables significativas al 10%? re elegir
-modelo <- lm(
-  Gainseñal ~ Pesove + Tiponac + Sex + CCove,
+modelo_1 <- lm(
+  Gainseñal ~ Edad + Partos + Pesove + CCove + LOTE + Tiponac +
+    Potrepari + Sex + Nodu + Induru + Eco + Lagubre +
+    Ancubre + Anchopez + Largopez + Peznum + Suspen +
+    Separ + Ubicpez + Simet,
   data = datos_preparto
 )
 
-summary(modelo)
-Anova(modelo)
+summary(modelo_1)
+anova(modelo_1) #que hace?
 ```
 
-### PREDICCIONES
+```{r}
+#ajustamos modelo segun variables significativas al 5%
+modelo_2 <- lm(
+  Gainseñal ~ Pesove + Tiponac + Sex + LOTE + Edad + CCove,
+  data = datos_preparto
+)
 
-```{r, eval = FALSE}
+summary(modelo_2)
+```
+
+```{r}
+#vemos que SEX deja de ser significativa 
+modelo_3 <- lm(
+  Gainseñal ~ Pesove + Tiponac,
+  data = datos_preparto
+)
+
+summary(modelo_3)
+```
+
+```{r}
 df <- data.frame(
   Pesove = mean(datos_preparto$Pesove),
   Tiponac = factor("Múltiple",
