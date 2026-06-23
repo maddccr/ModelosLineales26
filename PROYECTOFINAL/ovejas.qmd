@@ -587,7 +587,7 @@ df <- data.frame(
 
 ## Diagnostico
 
-### **Multicolinealidad** 
+### **Multicolinealidad**
 
 ```{r}
 #factores de inflacion de varianza
@@ -634,7 +634,7 @@ ks.test(residuos, 'pnorm')
 #todo indica que los errores son NORMALES 
 ```
 
-### Linealidad 
+### Linealidad
 
 ```{r}
 datos_preparto$pred <- fitted(modelin)
