@@ -2,7 +2,7 @@
 title: "ovejas"
 format: html
 editor: visual
-author: Madeline Cecere, Florencia Pricolli, Ariana Leal
+author: Madeline Cecere, Florencia Pricoli, Ariana Leal
 ---
 
 ## MODELOS LINEALES - PROYECTO FINAL
@@ -14,6 +14,7 @@ library(readxl)
 library(tidyverse)
 library(ggcorrplot)
 library(knitr)
+library(rcartocolor)
 library(patchwork) 
 
 #PARA DIAGNOSTICO
@@ -621,7 +622,7 @@ for(i in 1:length(cat_vars)) {
   g <- ggplot(datos_preparto,
               aes(x = .data[[cat_vars[i]]],
                   y = residuos)) +
-    geom_boxplot(fill = "#faa476") +
+    geom_boxplot(fill = "#dc3977") +
     theme_minimal() +
     xlab(nombres_cat[i]) +
     ylab("Residuos studentizados")
