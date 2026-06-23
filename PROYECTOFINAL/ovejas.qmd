@@ -655,6 +655,14 @@ ggplot(df_res, aes(x = i, y = t_i)) +
              linetype = "dashed") +
   xlab("Observación") +
   ylab("Residuo studentizado")
+
+# medidas de influencia
+h_i <- influence(modelin)$hat
+
+df <- data.frame(
+  i = 1:nrow(datos_preparto),
+  h_i = h_i
+)
 ```
 
 ```{r}
