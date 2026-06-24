@@ -589,29 +589,39 @@ for(i in num_vars2){
 
 datos_preparto$t_i <- residuos #studentizados
 
-ggplot(datos_preparto, aes(x = fitted(modelin), y = residuos)) +
-  geom_point() +
-  geom_hline(yintercept = 0) +
+ggplot(datos_preparto,
+       aes(x = fitted(modelin),
+           y = residuos)) +
+  geom_point(color = "#b9257a",
+    size = 1.5,
+    alpha = 0.75) +
+  geom_hline(yintercept = 0,
+    color = "black",
+    linetype = 2) +
   xlab("Valores ajustados") +
   ylab("Residuos studentizados")
+
 ```
 
 ```{r}
 #residuos vs x_j num
-
 for(i in 1:length(num_vars2)) {
 
   g <- ggplot(datos_preparto,
               aes(x = .data[[num_vars2[i]]],
                   y = residuos)) +
-    geom_point(color = "#7c1d6f") +
-    geom_hline(yintercept = 0,
-               linetype = "dashed") +
+    geom_point(color = "#b9257a",
+    size = 1.5,
+    alpha = 0.75) +
+  geom_hline(yintercept = 0,
+    color = "black",
+    linetype = 2) +
     theme_minimal() +
     xlab(num_vars2[i]) +
     ylab("Residuos studentizados")
 
   print(g)
+
 }
 ```
 
@@ -648,14 +658,37 @@ df_res <- data.frame(
   t_i = residuos
 )
 
-ggplot(df_res, aes(x = i, y = t_i)) +
-  geom_point() +
-  geom_hline(yintercept = c(-2,2),
-             color = "red",
-             linetype = "dashed") +
-  xlab("Observación") +
-  ylab("Residuo studentizado")
+ggplot(df_res,
+       aes(x = i, y = t_i)) +
 
+  geom_point(
+    color = "#b9257a",
+    size = 1.5,
+    alpha = 0.8
+  ) +
+
+  geom_hline(
+    yintercept = c(-2, 2),
+    color = "#faa476",
+    linetype = "dashed",
+    linewidth = 0.8
+  ) +
+
+  geom_hline(
+    yintercept = 0,
+    color = "grey50"
+  ) +
+
+  theme_classic() +
+
+  labs(
+    x = "Observación",
+    y = "Residuo studentizado"
+  ) +
+
+  theme(
+    text = element_text(size = 12)
+  )
 # medidas de influencia
 h_i <- influence(modelin)$hat
 
@@ -671,17 +704,47 @@ D_i <- cooks.distance(modelin)
 
 df$D_i <- D_i
 
+corte_cook <- 4/nrow(datos_preparto)
+
+df$influyente <- df$D_i > corte_cook
+
 ggplot(df, aes(x = i, y = D_i)) +
-  geom_point() +
-  geom_segment(aes(xend = i,
-                   y = 0,
-                   yend = D_i)) +
+
+  geom_segment(
+    aes(xend = i,
+        y = 0,
+        yend = D_i),
+    color = "grey80"
+  ) +
+
+  geom_point(
+    aes(color = influyente),
+    size = 1
+  ) +
+
   geom_hline(
-    yintercept = 4/nrow(datos_preparto),
-    color = "red",
+    yintercept = corte_cook,
+    color = "black",
     linetype = "dashed"
   ) +
-  ylab("Distancia de Cook")
+
+  scale_color_manual(
+    values = c("#b9257a", "#faa476"),
+    labels = c("No influyente", "Potencialmente influyente"),
+    name = ""
+  ) +
+
+  labs(
+    x = "Observación",
+    y = "Distancia de Cook",
+    ) +
+
+  theme_classic() +
+
+  theme(
+    legend.position = "bottom",
+    text = element_text(size = 12)
+  )
 ```
 
 ```{r}
