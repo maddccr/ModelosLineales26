@@ -16,7 +16,7 @@ library(ggcorrplot)
 library(knitr)
 library(rcartocolor)
 library(patchwork) 
-
+library(tibble)
 #PARA DIAGNOSTICO
 library(car)
 library(grpreg)
@@ -153,6 +153,74 @@ nombres_num <- c("Peso de la oveja",
 paleta <- c("#fcde9c","#faa476","#f0746e","#e34f6f","#dc3977","#b9257a","#7c1d6f")
 
 num_vars
+```
+
+### Tabla de descripcion de variables
+
+```{r}
+variables <- tibble(
+  Variable = c(
+    "Edad", "Partos", "Pesove", "CCove", "LOTE",
+    "Tiponac", "Potrepari", "Sex", "Gainseñal",
+    "Nodu", "Induru", "Eco", "Lagubre",
+    "Ancubre", "Anchopez", "Largopez", "Peznum",
+    "Suspen", "Separ", "Ubicpez", "Simet"
+  ),
+
+  Descripción = c(
+    "Edad de la oveja",
+    "Número de partos",
+    "Peso de la oveja",
+    "Condición corporal de la oveja",
+    "Manejo reproductivo",
+    "Tipo de nacimiento",
+    "Potrero donde nació el cordero",
+    "Sexo del cordero",
+    "Ganancia media de peso diario del cordero hasta la señalada (g/d)",
+    "Nodulos en ubre",
+    "Induración en ubre",
+    "Alteraciones ecográficas",
+    "Largo de ubre (cm)",
+    "Ancho de ubre (cm)",
+    "Ancho del pezón (cm)",
+    "Largo del pezón (cm)",
+    "Número de pezones",
+    "Suspensión de la ubre",
+    "Separación de la ubre",
+    "Ubicación de los pezones",
+    "Simetría de la ubre"
+  ),
+
+  `Tipo / Categorías` = c(
+    "DL, 2D, 4D, 6D, BL",
+    "Primípara, Multípara",
+    "Numérica (kg)",
+    "Numérica (1:muy flaca-5:muy gorda)",
+    "Inseminación artificial, Repaso con carnero",
+    "Simple, Múltiple",
+    "Chanchera, Embarcadero, Pradera",
+    "Hembra, Macho",
+    "Numérica",
+    "Ausencia, Presencia",
+    "Ausencia, Presencia",
+    "Normal, Alteración",
+    "Numérica",
+    "Numérica",
+    "Numérica",
+    "Numérica",
+    "Ausencia, Presencia",
+    "Ancha, Cuadrada, Pendulada",
+    "Marcada, Moderada, Sin",
+    "Lateral, Vertical, Horizontal",
+    "Simétrica, No simétrica"
+  )
+)
+
+kable(
+  variables,
+  align = c("l", "l", "l"),
+  booktabs = TRUE
+)
 ```
 
 ## Análisis Univariado
@@ -759,6 +827,41 @@ which(abs(rstudent(modelin)) > 2)
 
 
 #43 aparece en las tres, principal observacion influyente, evaluar
+```
+
+## Observación 43: LA OVEJA NEGRA
+
+```{r}
+#modelo ajustado
+datos_sin43 <- datos_preparto[-43, ]
+
+modelo_sin43 <- lm(
+  Gainseñal ~ .,
+  data = datos_sin43
+)
+
+#comparar
+summary(modelin)
+
+summary(modelo_sin43)
+#nuevas variables significativas
+
+```
+
+```{r}
+#R-cuadrado ajustado 
+summary(modelin)$adj.r.squared
+
+summary(modelo_sin43)$adj.r.squared
+
+
+```
+
+```{r}
+#Anova
+Anova(modelin)
+
+Anova(modelo_sin43)
 ```
 
 ## Significaciones del Primer modelo
