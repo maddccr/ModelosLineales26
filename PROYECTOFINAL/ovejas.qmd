@@ -352,19 +352,22 @@ datos_preparto |>
 
 #HACER EN % Y PANELADO (CREO Q CON UN PIVOT LONGER)
 
+lista_graficos <- list()
+
 for (i in 1:length(cat_vars)) {
-  graficos <- ggplot(datos_preparto, aes(x= .data[[cat_vars[i]]], 
+  lista_graficos[[i]] <- ggplot(datos_preparto, aes(x= .data[[cat_vars[i]]], 
                                         fill = .data[[cat_vars[i]]])) + 
-    geom_bar() +
+    geom_bar(aes(y = after_stat(count / sum(count)))) +
     theme_minimal() +
     xlab(nombres_cat[i]) +
+    ylab("Porcentaje") +
     theme(legend.position = "none") +
     scale_fill_carto_d(palette = "SunsetDark", 
                        type = "qualitative",
                        name = nombres_cat[i])
-  
-  print(graficos)
 } 
+
+wrap_plots(lista_graficos, ncol = 4)
 ```
 
 ## Análisis Bivariado (relaciones)
