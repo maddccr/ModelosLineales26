@@ -549,7 +549,7 @@ ggplot(df_long,
 
 SERIAMENTE PENSANDO USAR EL BACKWARD NOMAS
 
-```{r}
+```{r, eval=FALSE}
 #Por alta cantidad de variables --> no ajustar todos los modelos posibles
 #Metodo basado en log verosimilitud // criterios de informacion
 
@@ -765,6 +765,10 @@ ggplot(df_res,
   theme(
     text = element_text(size = 12)
   )
+
+```
+
+```{r}
 # medidas de influencia
 h_i <- influence(modelin)$hat
 
@@ -772,9 +776,6 @@ df <- data.frame(
   i = 1:nrow(datos_preparto),
   h_i = h_i
 )
-```
-
-```{r}
 # Distancia de Cook
 D_i <- cooks.distance(modelin)
 
