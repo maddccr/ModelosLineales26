@@ -873,6 +873,70 @@ Anova(modelin)
 Anova(modelo_sin43)
 ```
 
+## Test vs Train
+
+```{r}
+library(tidymodels)
+set.seed(1234)
+datos_preparto_split <- initial_split(datos_preparto, prop = 0.80)
+datos_preparto_split
+```
+
+```{r}
+# Datos de entrenamiento
+datos_preparto_train <- training(datos_preparto_split)
+# Datos de test
+datos_preparto_test <- testing(datos_preparto_split)
+```
+
+```{r}
+datos_lm =linear_reg() |>
+ set_engine('lm') |>
+ fit(Gainseñal~., data=datos_preparto_train)
+datos_lm |> tidy()
+```
+
+```{r}
+#evaluacion train
+resultados_lm_train = datos_preparto_train |> dplyr::select(Gainseñal) |>
+ bind_cols(predict(datos_lm, datos_preparto_train)) |>
+ rename(.pred_lm=.pred)
+resultados_lm_train |>  head()
+```
+
+```{r}
+#valores reales vs predichos
+resultados_lm_train |> ggplot(aes(x=Gainseñal,y=.pred_lm))+
+ geom_point()+
+theme_bw()
+```
+
+```{r}
+#metricas
+metrics(resultados_lm_train, truth = Gainseñal, estimate = .pred_lm)
+
+```
+
+```{r}
+#evaluacion test
+resultados_lm_test = datos_preparto_test |> dplyr::select(Gainseñal) |>
+ bind_cols(predict(datos_lm, datos_preparto_test)) |>
+ rename(.pred_lm=.pred)
+resultados_lm_test |>  head()
+```
+
+```{r}
+#valores reales vs predichos
+resultados_lm_test |> ggplot(aes(x=Gainseñal,y=.pred_lm))+
+ geom_point()+
+theme_bw()
+```
+
+```{r}
+#metricas
+metrics(resultados_lm_test, truth = Gainseñal, estimate = .pred_lm)
+```
+
 ## Significaciones del Primer modelo
 
 ```{r}
