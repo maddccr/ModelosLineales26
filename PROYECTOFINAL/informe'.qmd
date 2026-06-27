@@ -1,0 +1,330 @@
+---
+title: "Informe final"
+author: "Ariana Leal, Florencia Pricoli, Madeline Cecere"
+format: pdf
+editor: visual
+---
+
+# **Introducción**
+
+En el marco del proyecto “Morfología externa y defectos de ubre/pezones en ovejas Merino Australiano: asociación con el crecimiento predestete de los corderos”, el presente trabajo tiene como objetivo principal la construcción de un modelo de regresión lineal múltiple (RLM) para explicar la ganancia promedio de peso diario de los corderos en función de la conformación, tamaño, presencia de defectos en la ubre y pezones. Se incluyen además covariables de ajuste como: sexo del cordero, edad de la madre, tipo de nacimiento. Buscando responder..  cuáles tienen mayor capacidad explicativa y qué porcentaje del modelo realmente explican?.
+
+La fase experimental del proyecto fue realizada en una majada de ovejas perteneciente al Campo Experimental Nº 1 de Facultad de Veterinaria (Migues) a lo largo de cuatro etapas del ciclo productivo: pre-encarnerada, preparto, señalada, y destete. El modelo presentado utiliza solo las mediciones de las variables explicativas en la segunda etapa, preparto, y la variables respuesta teniendo como variable respuesta la ganancia promedio de peso diario entre el nacimiento y la señalada. 
+
+Primeramente, se realizo un analisis exploratorio de los datos de índole descriptivo. Un estudio univariado de sus distribuciones y medidas de resumen, asi como un primer acercamiento a sus posibles relaciones mediante correlaciones y comparacion de mediana y media entre grupos. 
+
+En base a un primer modelo aditivo con todas las variables, se utilizaron técnicas de preselección del variables. Dada la gran cantidad de variables, especialmente categóricas con múltiples niveles, se aplicaran técnicas de selección de variables para reducir la complejidad del modelo inicial en favorecimiento de la interpretabilidad. Con el modelo reducido se realizo un diagnostico de los principales supuestos de la RLM: homocedasticidad, ausencia de multicolinealidad, normalidad de los errores, linealidad entre…
+
+(Selección, diagnostico, ajuste, pdh. predicción)
+
+**Materiales y métodos**
+
+Datos
+
+La base de datos utilizada, de la etapa preparto, contaba con 174 observaciones y 23 variables relevantes. Se detectaron 15 observación con presencia de NAs, dado el bajo porcentaje se opto por eliminar dichas observaciones. De las variables relevantes se descartaron en la etapa inicial dos de ellas (Ondulación en los pezones y Nódulos en los pesos) por extremo desbalance de las categorias (Presencia \< 1%). Finalmente, se conto con 159 observaciones y 20 variables explicativas. 
+
+A continuación se presenta una breve descripción de las variables relevantes:
+
+```{r}
+#| echo: false
+library(tibble)
+library(knitr)
+variables <- tibble(
+  Variable = c(
+    "Edad", "Partos", "Pesove", "CCove", "LOTE",
+    "Tiponac", "Potrepari", "Sex", "Gainseñal",
+    "Nodu", "Induru", "Eco", "Lagubre",
+    "Ancubre", "Anchopez", "Largopez", "Peznum",
+    "Suspen", "Separ", "Ubicpez", "Simet"
+  ),
+
+  Descripción = c(
+    "Edad de la oveja",
+    "Número de partos",
+    "Peso de la oveja",
+    "Condición corporal de la oveja",
+    "Manejo reproductivo",
+    "Tipo de nacimiento",
+    "Potrero donde nació el cordero",
+    "Sexo del cordero",
+    "Ganancia media de peso diario del cordero hasta la señalada (g/d)",
+    "Nodulos en ubre",
+    "Induración en ubre",
+    "Alteraciones ecográficas",
+    "Largo de ubre (cm)",
+    "Ancho de ubre (cm)",
+    "Ancho del pezón (cm)",
+    "Largo del pezón (cm)",
+    "Número de pezones",
+    "Suspensión de la ubre",
+    "Separación de la ubre",
+    "Ubicación de los pezones",
+    "Simetría de la ubre"
+  ),
+
+  `Tipo / Categorías` = c(
+    "DL, 2D, 4D, 6D, BL",
+    "Primípara, Multípara",
+    "Numérica (kg)",
+    "Numérica (1:muy flaca-5:muy gorda)",
+    "Inseminación artificial, Repaso con carnero",
+    "Simple, Múltiple",
+    "Chanchera, Embarcadero, Pradera",
+    "Hembra, Macho",
+    "Numérica",
+    "Ausencia, Presencia",
+    "Ausencia, Presencia",
+    "Normal, Alteración",
+    "Numérica",
+    "Numérica",
+    "Numérica",
+    "Numérica",
+    "Ausencia, Presencia",
+    "Ancha, Cuadrada, Pendulada",
+    "Marcada, Moderada, Sin",
+    "Lateral, Vertical, Horizontal",
+    "Simétrica, No simétrica"
+  )
+)
+
+kable(
+  variables,
+  align = c("l", "l", "l"),
+  booktabs = TRUE
+)
+```
+
+$$
+\text{CUADRO 1: Tabla de descripcion de variables}
+$$
+
+(TABLA)- ARI
+
+SELECCIÓN DE VARIABLES
+
+LASSO– flor
+
+AIC/BIC  (tabla?) --MADE
+
+DIAGNOSTICO
+
+Multicolinealidad (tabla vif) // CITAR LIBRERÍAS 
+
+Linealidad (4 plot, panelar)
+
+Normalidad (qq, tests)
+
+Homocedasticidad (ypred vs res, test)
+
+Datos atípicos/afluentes (scatter atípicos, cook, oveja negra) 
+
+## RESULTADOS
+
+Para caracterizar la $ganancia\ media\ de\ peso\ diario\ del\ cordero\ hasta\ la\ señalada\ (g/d)$, se realizó un análisis descriptivo univariado. La forma de la distribución se presenta en la Figura 1, donde se destaca la media muestral para facilitar su identificación.
+
+```{r,warning=FALSE,message=FALSE}
+#| echo: false
+library(readxl)
+library(tidyverse)
+library(ggcorrplot)
+library(knitr)
+library(rcartocolor)
+library(patchwork) 
+library(tibble)
+#PARA DIAGNOSTICO
+library(car)
+library(grpreg)
+library(ggrepel) 
+library(qqplotr)
+library(skedastic) 
+datos <- read_excel("datosoveja.xlsx", sheet = "Datos hasta señalada", na = "." )
+#str(datos)
+
+datos_preparto <- datos |> filter( Momento == "Preparto") 
+nrow(na.omit(datos_preparto)) #159 de 174 
+nrow(na.omit(datos))
+
+
+#Se eliminan las observaciones con NAs
+datos_preparto <- na.omit(datos_preparto)
+datos_preparto <- datos_preparto |> 
+ mutate(
+    Ubicpez = if_else(Ubicpez == 3, 2, Ubicpez),
+    Separ = if_else(Separ == 1,2, Separ),
+    Suspen = if_else(Suspen == 3, 1, Suspen),
+    Tiponac = ifelse(Tiponac == 3, 2, Tiponac)
+  )
+
+#Transformamos las variables categoricas en factor
+datos_preparto <- datos_preparto |> 
+  mutate(Edad = as.factor(Edad),
+         Partos = as.factor(Partos),
+         Pesove = as.numeric(Pesove),
+         CCove = as.numeric(CCove),
+         LOTE = as.factor(LOTE),
+         Tiponac = as.factor(Tiponac),
+         Potrepari = as.factor(Potrepari),
+         Sex = as.factor(Sex),
+         Gainseñal = as.numeric(Gainseñal),
+         Nodu = as.factor(Nodu),
+         Induru = as.factor(Induru),
+         Nodpez = as.factor(Nodpez),
+         Indupez = as.factor(Indupez),
+         Eco = as.factor(Eco),
+         Ancubre = as.numeric(Ancubre),
+         Peznum = as.factor(Peznum),
+         Suspen = as.factor(Suspen),
+         Separ = as.factor(Separ),
+         Ubicpez = as.factor(Ubicpez),
+         Simet = as.factor(Simet) ) 
+
+#str(datos_preparto)
+
+#Variables con desbalance extremo
+which(datos_preparto$Indupez == 1) #hay uno solo
+which(datos_preparto$Nodpez == 1) #no hay
+
+#Eliminamos variables no relevantes para el analisis o por falta extrema de homegenidad en categorias
+datos_preparto <- datos_preparto |> 
+  dplyr::select(-PadCord, -PN, -Nodpez, -Indupez, -IDM, -Momento, -Idcord)
+datos_preparto <- datos_preparto |> 
+  mutate(
+    Partos = fct_recode(Partos,"Multipara" = "M","Primipara" = "P"),
+    LOTE = fct_recode(LOTE,"Inseminación artificial" = "IA",
+                           "Repaso con carnero" = "R"),
+    Tiponac = fct_recode(Tiponac, "Simple" = "1","Múltiple" = "2"),
+    Sex = fct_recode(Sex,"Hembra" = "H","Macho" = "M"),
+    Nodu = fct_recode(Nodu, "Ausencia" = "0","Presencia" = "1"),
+    Induru = fct_recode(Induru,"Ausencia" = "0","Presencia" = "1"),
+    Eco = fct_recode(Eco,"Normal" = "0","Alteración" = "1"),
+    Peznum = fct_recode(Peznum, "Ausencia" = "0","Presencia" = "1"),
+    Suspen = fct_recode(Suspen,"No cuadrada" = "1",
+                               "Cuadrada" = "2"),
+    Separ = fct_recode(Separ, "Con" = "2",
+                             "Sin" = "3"),
+    Ubicpez = fct_recode(Ubicpez, "Lateral" = "1",
+                                  "No lateral" = "2"),
+    Simet = fct_recode(Simet, "Simétrica" = "0", "No simétrica" = "1")
+  )
+library(tidyverse)
+ggplot(datos_preparto, aes(x = Gainseñal)) +
+  
+  geom_histogram(aes(y = after_stat(density)),
+                   fill = "grey",
+                   color = "white",
+                   bins = 15,
+                   alpha = 0.8) +
+  
+  geom_density(fill = "#dc3977", alpha = 0.6, color = NA) +
+  
+  geom_vline(xintercept = mean(datos_preparto$Gainseñal),
+             linetype = "dashed",
+             linewidth = 1) +
+  annotate("text",
+           x = mean(datos_preparto$Gainseñal),
+           y = 0,
+           label = "Media",
+           angle = 90,
+           vjust = -0.5) +
+  theme_minimal() +
+  labs(x = "Ganancia media de peso diario",
+       y = "Densidad",
+       title = "Distribución de la ganancia media de peso diario",
+       subtitle = "(Nacimiento hasta señalada)")
+```
+
+$$
+\text{FIGURA 1: Distribucion de la ganancia media de peso diario}
+$$
+
+Asimismo, el Cuadro 2 resume las principales medidas estadísticas de la variable, incluyendo la tendencia central (media y mediana), la dispersión (desvío estándar) y sus valores extremos. .
+
+```{r}
+#| echo: false
+datos_preparto |>
+  summarise(
+    Media = mean(Gainseñal),
+    Mediana = median(Gainseñal),
+    Desvio = sd(Gainseñal),
+    Minimo = min(Gainseñal),
+    Maximo = max(Gainseñal)
+  ) |> kable()
+```
+
+$$
+\text{CUADRO 2:Medidas descriptivas de la variable Gainseñal}
+$$
+
+Con el objetivo de caracterizar el conjunto de variables explicativas y entender su comportamiento antes del ajuste del modelo, se realizó un análisis descriptivo multivariado.
+
+Variables Numéricas
+
+Las variables numéricas se clasificaron en discretas (Condición corporal de la oveja y Ancho del pezón) y continuas (Peso de la oveja, Largo de ubre, Ancho de ubre y Largo del pezón). 
+
+El analisis para cada una fue el siguiente:
+
+-   Variables Discretas: Se construyeron diagramas de barras, con el objetivo de describir la distribución de frecuencias de sus distintas categorías. 
+
+-   Variables Continuas: Se utilizaron histogramas con curvas de densidad superpuestas. Esta combinación permitió analizar simultáneamente la distribución de frecuencias y la suavidad de la forma de la distribución. 
+
+-   Medidas de Dispersión y Tendencia Central: Se realizaron boxplots para tres variables clave (Condición corporal, Largo de ubre y Largo del pezón), facilitando la identificación visual de la variabilidad y la posible presencia de valores atípicos.
+
+-   Medidas de resumen: Se generó un cuadro comparativo que incluye la media, la mediana, el desvío estándar, el valor mínimo y el valor máximo de todas las variables numéricas consideradas en el estudio. 
+
+Variables Categórica
+
+Para las variables de naturaleza cualitativa, se elaboraron diagramas de barras. Esta representación gráfica permitió observar la frecuencia de observaciones correspondiente a cada categoría y describir la distribución de los datos dentro de cada variable 
+
+INTERPRETACION….
+
+Análisis descriptivo
+
+-Distribución Y, simetría, concentración en valores
+
+-Tabla medidas de resumen numéricas
+
+**-Diagrama barras panelado**
+
+Se observa para las variables binarias nódulos en las ubres,indulaciones en las ubres y simetría un extremo desbalance de las categorias con Presencia del defecto \< 5?? siguiendo suspension. Las variables morfológicas con mayor balance son alteraciones eco y presencia de pezones supernumerarios. 
+
+**-Mapa calor corr**
+
+La correlación positiva entre variables numéricas mas alta fueron, resultado esperado entre el ancho y largo de los pezones (0.6) y largo y ancho de la ubre (0.7). Se observa tambien una correlación positiva moderada entre el peso de la oveja y el largo, ancho de la ubre (0.34 y 0.31) y largo de pezones (0.25). En cuanto a la correlación con la variables respuesta (Gainseñal) la mayoría es cercana a cero, siendo las mas altas y negativas con ancho de ubre (-0.26) y largo ubre (-0.22)
+
+-Boxplot → Simetria, eco, sexo, tipo nac, edad 
+
+(mandar fotito a chat me da paja escribir)
+
+Modelo
+
+-Summary (solo signif global y R2) y Anova p valores 
+
+**Datos atipicos/influyentes**
+
+La etapa de diagnóstico se completó mediante la identificación de observaciones que, por sus características, podrían distorsionar las estimaciones del modelo o invalidar las inferencias. Para ello, se evaluaron tres dimensiones complementarias: la presencia de valores atípicos, el apalancamiento (leverage) y la Distancia de Cook.
+
+**OBSERVACIONES ATIPICAS (OUTLIERS)**
+
+Se utilizaron residuos studentizados externamente (t_i) para detectar observaciones cuyo valor de respuesta (Y) se aleja de la predicción del modelo. Siguiendo el criterio estándar, se identificaron como potencialmente atípicas aquellas observaciones con ∣t_i ∣\>2. El análisis de estos puntos es necesario ya que la presencia de datos atípicos pueden afectar el cumplimiento del supuesto de normalidad de los errores, incluso sin ser influyentes.
+
+**LEVERAGE**
+
+Es un indicador util para determinar la influencia de cada observacion y detectar observaciones con valores extremos en el espacio de las variables explicativas. Se calcularon los elementos de la diagonal de la matriz h_ii. Se utilizó un umbral de 0.352 para detectar los datos que influeyn demasiado en la determinación de la superficie de respuesta, los cuales tienen la capacidad de atraer la recta de regresión hacia sus propios valores.
+
+**DISTANCIA DE COOK**
+
+La distancia de Cook cuantifica el cambio en el vector de estimaciones luego de remover la i-ésima observación, se calculó para integrar el efecto del residuo y del Leverage en una única medida de influencia globar. Para determinar si alguna observación tiene una influencia “significativa” se aplicó un umbral de corte de 4/n (D_i \> 4/n), equivalente a 0.0252 en el estudio.
+
+**Observación 43-OVEJA NEGRA**
+
+Los resultados obtenidos mediante el análisis de residuos studentizados, leverage y distancia de Cook identificaron a la observación 43 como la única que fue señalada simultáneamente por los tres criterios, indicando que se trata de una observación potencialmente influyente. En consecuencia, se consideró necesario evaluar el efecto de su eliminación sobre el ajuste del modelo.
+
+Para ello se realizó un análisis de sensibilidad, consistente en ajustar nuevamente el modelo de regresión lineal excluyendo la observación 43 y comparar los resultados con los obtenidos en el modelo original mediante los resúmenes de ambos modelos y las tablas Anova.
+
+Al eliminar dicha observación se observó un incremento del (R\^2) ajustado (de 0.226 a 0.276), una leve disminución del error residual y cambios en la significancia estadística de algunas variables. En particular, la variable Simet pasó de no ser significativa ((p = 0.164)) a presentar un efecto estadísticamente significativo ((p = 0.0085)), lo que evidencia que la observación 43 ejerce una influencia importante sobre las estimaciones del modelo.
+
+Sin embargo, también se observó que la eliminación de esta observación produjo la desaparición de algunos niveles de variables categóricas presentes en el modelo original. Como consecuencia, el modelo ajustado estimó un menor número de parámetros, modificándose los grados de libertad y la estructura del modelo. Por este motivo, las diferencias observadas entre ambos ajustes no pueden atribuirse exclusivamente a la eliminación de la observación 43.
+
+Dado que no se dispone de evidencia que indique que dicha observación corresponda a un error de registro o de medición, se decidió conservarla en el análisis final y presentar el análisis de sensibilidad únicamente como una evaluación de la influencia que esta observación ejerce sobre los resultados del modelo.
+
+**Discusión**
