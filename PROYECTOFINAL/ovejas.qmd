@@ -951,6 +951,8 @@ theme_bw()
 metrics(resultados_lm_test, truth = Gainseñal, estimate = .pred_lm)
 ```
 
+### ASUMIMOS MODELO FINAL PARA PREDECIR
+
 ## Significaciones del Primer modelo
 
 ```{r}
@@ -972,7 +974,64 @@ Anova(modelo)
 
 ### PREDICCIONES
 
+```{r}
+modelo_train <- lm(
+  Gainseñal ~ Pesove + Tiponac + Sex,
+  data = datos_preparto_train
+)
+```
+
+```{r}
+#predecimos test
+pred <- predict(
+  modelo_train,
+  newdata = datos_preparto_test
+)
+```
+
+```{r}
+#calculamos metricas
+resultados <- datos_preparto_test |>
+  mutate(.pred = pred)
+metrics(resultados, truth = Gainseñal, estimate = .pred)
+```
+
+```{r}
+#predicción de una observación futura
+oveja_nueva <- data.frame(
+  Pesove = mean(datos_preparto$Pesove),
+  CCove = mean(datos_preparto$CCove),
+  Tiponac = factor("Simple",
+                   levels = levels(datos_preparto$Tiponac)),
+  Sex = factor("Hembra",
+               levels = levels(datos_preparto$Sex))
+) #elegir una oveja representativa ""
+
+oveja_nueva <- datos_preparto_test[1, names(model.frame(modelo_train))[-1]]#o una oveja del dataset ejemplo la primera
+
+predict(
+  modelo_train,
+  newdata = oveja_nueva,
+  interval = "confidence"
+)
+```
+
+```{r}
+predict(
+  modelo_train,
+  newdata = oveja_nueva,
+  interval = "prediction"
+)
+```
+
+segun chat :
+
+-   **intervalo de confianza:** estima la **ganancia media esperada** para ovejas con esas características.
+
+-    **Intervalo de predicción:** estima la **ganancia esperada de una oveja individual**, por eso es más amplio.
+
 ```{r, eval = FALSE}
+#esta fue la primer prediccion la dle principio
 df <- data.frame(
   Pesove = mean(datos_preparto$Pesove),
   Tiponac = factor("Múltiple",
