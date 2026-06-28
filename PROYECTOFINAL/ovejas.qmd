@@ -123,7 +123,10 @@ datos_preparto <- datos_preparto |>
 
 ```{r}
 #Para graficar
-cat_vars <- names(Filter(is.factor, datos_preparto))
+cat_vars <- datos_preparto %>%
+  dplyr::select(where(is.factor)) %>%
+  dplyr::select(-Sex, -Potrepari) %>%
+  names()
 num_vars <- datos_preparto |> dplyr::select(where(is.numeric)) |> names() |> 
   setdiff("Gainseñal")
 
@@ -131,8 +134,6 @@ nombres_cat <- c("Edad (cronología dentaria)",
                  "Número de partos",
                  "Manejo reproductivo",
                  "Tipo de nacimiento",
-                 "Potrero",
-                 "Sexo",
                  "Nodulos en ubre",
                  "Induración en ubre",
                  "Alteraciones ecograficas",
@@ -369,8 +370,16 @@ for (i in 1:length(cat_vars)) {
                        name = nombres_cat[i])
 } 
 
-wrap_plots(lista_graficos, ncol = 4)
-#TITULO GLOBAL Y SACAR SEXO Y POTRERO
+wrap_plots(lista_graficos, ncol = 4) +
+  plot_annotation(title = "Variables explicativas categóricas",
+                  theme = theme(
+                    plot.title = element_text(
+                      size = 16,
+                      face = "bold",
+                      hjust = 0.5
+                    )
+                  ))
+
 ```
 
 ## Análisis Bivariado (relaciones)
@@ -452,6 +461,9 @@ for(i in 1:length(cat_vars)) {
   
   print(g)
 }
+
+datos_preparto |> 
+  t_test(Gainseñal ~ Simet)
 ```
 
 ## Análisis Multivariado (Interacciones)
@@ -550,12 +562,13 @@ cv_glmnet <- cv.glmnet(y = y_vector_normal,
                        alpha = 1)
 plot(cv_glmnet)
 
+lambda_opt <- cv_glmnet$lambda.min
 modR <- glmnet(y = y_vector_normal,
                x = matriz,
                alpha = 1,
                lambda = lambda_opt)
 
-lambda_opt <- cv_glmnet$lambda.min
+
 coef(modR)
 
 ```
@@ -643,9 +656,17 @@ qq <- data.frame(teoricos = z_i,
 qq |> ggplot(aes(sample = empiricos)) +
   stat_qq_band(fill = 2) +
   stat_qq_line(col = 2) +
-  stat_qq_point() +
-  xlab("Cuantiles teoricos")+
-  ylab("Cuantiles empiricos")
+  stat_qq_point(alpha = 0.7, size = 2) +
+  xlab("Cuantiles teóricos")+
+  ylab("Cuantiles empíricos") +
+  labs(title = "Evaluación de normalidad con QQ plot") +
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(
+      hjust = 0.5,
+      face = "bold"
+    )
+  )
 
 #PdH
 # H0) Los errores son normales
@@ -1026,9 +1047,9 @@ predict(
 
 segun chat :
 
--   **intervalo de confianza:** estima la **ganancia media esperada** para ovejas con esas características.
+- **intervalo de confianza:** estima la **ganancia media esperada** para ovejas con esas características.
 
--    **Intervalo de predicción:** estima la **ganancia esperada de una oveja individual**, por eso es más amplio.
+- **Intervalo de predicción:** estima la **ganancia esperada de una oveja individual**, por eso es más amplio.
 
 ```{r, eval = FALSE}
 #esta fue la primer prediccion la dle principio
