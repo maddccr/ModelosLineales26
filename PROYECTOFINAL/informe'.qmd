@@ -17,7 +17,7 @@ En base a un primer modelo aditivo con todas las variables, se utilizaron técni
 
 (Selección, diagnostico, ajuste, pdh. predicción)
 
-**Materiales y métodos**
+# **Materiales y métodos**
 
 Datos
 
@@ -118,7 +118,7 @@ Homocedasticidad (ypred vs res, test)
 
 Datos atípicos/afluentes (scatter atípicos, cook, oveja negra) 
 
-## RESULTADOS
+# Resultados
 
 Para caracterizar la $ganancia\ media\ de\ peso\ diario\ del\ cordero\ hasta\ la\ señalada\ (g/d)$, se realizó un análisis descriptivo univariado. La forma de la distribución se presenta en la Figura 1, donde se destaca la media muestral para facilitar su identificación.
 
@@ -252,7 +252,7 @@ datos_preparto |>
 ```
 
 $$
-\text{CUADRO 2:Medidas descriptivas de la variable Gainseñal}
+\text{CUADRO 2: Medidas descriptivas de la variable Gainseñal}
 $$
 
 Con el objetivo de caracterizar el conjunto de variables explicativas y entender su comportamiento antes del ajuste del modelo, se realizó un análisis descriptivo multivariado.
@@ -299,21 +299,137 @@ Modelo
 
 -Summary (solo signif global y R2) y Anova p valores 
 
-**Datos atipicos/influyentes**
+# Diagnostico
+
+## Homoscedasticidad
+
+El supuesto de homocedasticidad establece que la varianza de los errores del modelo de regresión es constante $(σ^2)$, es decir no depende de ninguna de las variables explicativas ni de cualquier combinación lineal de estas. El cumplimiento de esta condición es importante, ya que si los errores son heterocedásticos, el estimador usual de la matriz de varianza-covarianza se vuelve sesgado e inconsistente, lo que invalida las pruebas de hipótesis y los intervalos de confianza al producir resultados demasiado "liberales" o "conservadores" Con el fin de verificar el cumplimiento de este supuesto en el modelo ajustado, se realizaron los siguientes procedimientos:
+
+**Análisis Gráfico (Pruebas Visuales)**
+
+Se llevaron a cabo pruebas visuales, conocidas técnicamente como "eyeball tests", para detectar patrones en la variabilidad de los residuos. Para este análisis se utilizaron residuos studentizados $(t_i )$, que permiten una escala común para comparar la dispersión.
+
+Los gráficos generados fueron:
+
+Residuos vs. Valores Ajustados: Se graficaron los residuos contra las predicciones del modelo $( \hat{Y} )$ para observar si la dispersión se mantiene uniforme en todo el rango de valores ajustados.
+
+```{r}
+#| echo: false
+
+#residuos vs predichos
+
+datos_diagnostico$t_i <- residuos #studentizados
+
+ggplot(datos_diagnostico,
+       aes(x = fitted(modelin),
+           y = residuos)) +
+  geom_point(color = "#b9257a",
+    size = 1.5,
+    alpha = 0.75) +
+  geom_hline(yintercept = 0,
+    color = "black",
+    linetype = 2) +
+  xlab("Valores ajustados") +
+  ylab("Residuos studentizados")
+
+
+```
+
+$$
+\text{Figura X: Valores ajustados vs Residuos studentizados}
+$$
+
+Residuos vs. Variables Explicativas Numéricas: Se realizaron diagramas de dispersión individuales para cada variable independiente continua, buscando identificar si la varianza del error depende de algún predictor específico.
+
+Residuos vs. Variables Explicativas Categóricas: Se utilizaron gráficos de caja (boxplots) para comparar la distribución de los residuos entre los diferentes niveles de los factores cualitativos, evaluando la estabilidad de la varianza entre grupos.
+
+**Prueba de Hipótesis**
+
+Para complementar la inspección visual con un criterio estadístico riguroso, se aplicó la prueba de Breusch-Pagan. Esta prueba contrasta formalmente si la varianza de los errores es constante frente a la alternativa de que es una función de los predictores del modelo:
+
+$$\begin{aligned}
+H_0) \quad & \mathbb{V}ar(\varepsilon_i) = \sigma^2 \\
+H_1) \quad & \color{red}{\mathbb{V}ar(\varepsilon_i) = \sigma^2 \times h(X_1, X_2, \dots, X_k)}
+\end{aligned}$$
+
+##interpretacion y conclusion
+
+## **Datos atipicos/influyentes**
 
 La etapa de diagnóstico se completó mediante la identificación de observaciones que, por sus características, podrían distorsionar las estimaciones del modelo o invalidar las inferencias. Para ello, se evaluaron tres dimensiones complementarias: la presencia de valores atípicos, el apalancamiento (leverage) y la Distancia de Cook.
 
 **OBSERVACIONES ATIPICAS (OUTLIERS)**
 
-Se utilizaron residuos studentizados externamente (t_i) para detectar observaciones cuyo valor de respuesta (Y) se aleja de la predicción del modelo. Siguiendo el criterio estándar, se identificaron como potencialmente atípicas aquellas observaciones con ∣t_i ∣\>2. El análisis de estos puntos es necesario ya que la presencia de datos atípicos pueden afectar el cumplimiento del supuesto de normalidad de los errores, incluso sin ser influyentes.
+Se utilizaron residuos studentizados externamente $(t_i)$ para detectar observaciones cuyo valor de respuesta $(Y)$ se aleja de la predicción del modelo. Siguiendo el criterio estándar, se identificaron como potencialmente atípicas aquellas observaciones con $∣t_i ∣>2$. El análisis de estos puntos es necesario ya que la presencia de datos atípicos pueden afectar el cumplimiento del supuesto de normalidad de los errores, incluso sin ser influyentes.
 
 **LEVERAGE**
 
-Es un indicador util para determinar la influencia de cada observacion y detectar observaciones con valores extremos en el espacio de las variables explicativas. Se calcularon los elementos de la diagonal de la matriz h_ii. Se utilizó un umbral de 0.352 para detectar los datos que influeyn demasiado en la determinación de la superficie de respuesta, los cuales tienen la capacidad de atraer la recta de regresión hacia sus propios valores.
+Es un indicador util para determinar la influencia de cada observacion y detectar observaciones con valores extremos en el espacio de las variables explicativas. Se calcularon los elementos de la diagonal de la matriz $h_{ii}$. Se utilizó un umbral de $0.352$ para detectar los datos que influeyn demasiado en la determinación de la superficie de respuesta, los cuales tienen la capacidad de atraer la recta de regresión hacia sus propios valores.
 
 **DISTANCIA DE COOK**
 
-La distancia de Cook cuantifica el cambio en el vector de estimaciones luego de remover la i-ésima observación, se calculó para integrar el efecto del residuo y del Leverage en una única medida de influencia globar. Para determinar si alguna observación tiene una influencia “significativa” se aplicó un umbral de corte de 4/n (D_i \> 4/n), equivalente a 0.0252 en el estudio.
+La distancia de Cook cuantifica el cambio en el vector de estimaciones luego de remover la i-ésima observación, se calculó para integrar el efecto del residuo y del Leverage en una única medida de influencia globar. Para determinar si alguna observación tiene una influencia “significativa” se aplicó un umbral de corte de $D_i>\frac{4}{n}$ , equivalente a $0.0252$ en el estudio.
+
+```{r}
+#| echo: false
+# medidas de influencia
+h_i <- influence(modelin)$hat
+
+df <- data.frame(
+  i = 1:nrow(datos_preparto),
+  h_i = h_i
+)
+# Distancia de Cook
+D_i <- cooks.distance(modelin)
+
+df$D_i <- D_i
+
+corte_cook <- 4/nrow(datos_diagnostico)
+
+df$influyente <- df$D_i > corte_cook
+
+ggplot(df, aes(x = i, y = D_i)) +
+
+  geom_segment(
+    aes(xend = i,
+        y = 0,
+        yend = D_i),
+    color = "grey80"
+  ) +
+
+  geom_point(
+    aes(color = influyente),
+    size = 1
+  ) +
+
+  geom_hline(
+    yintercept = corte_cook,
+    color = "black",
+    linetype = "dashed"
+  ) +
+
+  scale_color_manual(
+    values = c("#b9257a", "#faa476"),
+    labels = c("No influyente", "Potencialmente influyente"),
+    name = ""
+  ) +
+
+  labs(
+    x = "Observación",
+    y = "Distancia de Cook",
+    ) +
+
+  theme_classic() +
+
+  theme(
+    legend.position = "bottom",
+    text = element_text(size = 12)
+  )
+```
+
+$$
+\text{FIGURA X: Distancia de Cook}
+$$
 
 **Observación 43-OVEJA NEGRA**
 
@@ -321,7 +437,7 @@ Los resultados obtenidos mediante el análisis de residuos studentizados, levera
 
 Para ello se realizó un análisis de sensibilidad, consistente en ajustar nuevamente el modelo de regresión lineal excluyendo la observación 43 y comparar los resultados con los obtenidos en el modelo original mediante los resúmenes de ambos modelos y las tablas Anova.
 
-Al eliminar dicha observación se observó un incremento del (R\^2) ajustado (de 0.226 a 0.276), una leve disminución del error residual y cambios en la significancia estadística de algunas variables. En particular, la variable Simet pasó de no ser significativa ((p = 0.164)) a presentar un efecto estadísticamente significativo ((p = 0.0085)), lo que evidencia que la observación 43 ejerce una influencia importante sobre las estimaciones del modelo.
+Al eliminar dicha observación se observó un incremento del $(R^2)$ ajustado (de $0.226$ a $0.276$), una leve disminución del error residual y cambios en la significancia estadística de algunas variables. En particular, la variable Simet pasó de no ser significativa $(p = 0.164)$ a presentar un efecto estadísticamente significativo $(p = 0.0085)$, lo que evidencia que la observación 43 ejerce una influencia importante sobre las estimaciones del modelo.
 
 Sin embargo, también se observó que la eliminación de esta observación produjo la desaparición de algunos niveles de variables categóricas presentes en el modelo original. Como consecuencia, el modelo ajustado estimó un menor número de parámetros, modificándose los grados de libertad y la estructura del modelo. Por este motivo, las diferencias observadas entre ambos ajustes no pueden atribuirse exclusivamente a la eliminación de la observación 43.
 
