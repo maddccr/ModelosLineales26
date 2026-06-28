@@ -93,7 +93,8 @@ datos_preparto <- datos_preparto |>
          Suspen = as.factor(Suspen),
          Separ = as.factor(Separ),
          Ubicpez = as.factor(Ubicpez),
-         Simet = as.factor(Simet) ) 
+         Simet = as.factor(Simet) ) |> 
+  relocate(Gainseñal)
 
 #str(datos_preparto)
 
@@ -170,14 +171,16 @@ paleta <- c("#fcde9c","#faa476","#f0746e","#e34f6f","#dc3977","#b9257a","#7c1d6f
 ```{r}
 variables <- tibble(
   Variable = c(
+    "Gainseñal",
     "Edad", "Partos", "Pesove", "CCove", "LOTE",
-    "Tiponac", "Potrepari", "Sex", "Gainseñal",
+    "Tiponac", "Potrepari", "Sex", 
     "Nodu", "Induru", "Eco", "Lagubre",
     "Ancubre", "Anchopez", "Largopez", "Peznum",
     "Suspen", "Separ", "Ubicpez", "Simet"
   ),
 
   Descripción = c(
+    "Ganancia media de peso diario del cordero hasta la señalada (gr/d)",
     "Edad de la oveja (cronología dentaria)",
     "Número de partos",
     "Peso de la oveja (kg)",
@@ -186,7 +189,6 @@ variables <- tibble(
     "Tipo de nacimiento",
     "Potrero donde nació el cordero",
     "Sexo del cordero",
-    "Ganancia media de peso diario del cordero hasta la señalada (gr/d)",
     "Nodulos en ubre",
     "Induración en ubre",
     "Alteraciones ecográficas",
@@ -202,6 +204,7 @@ variables <- tibble(
   ),
 
   `Tipo / Categorías` = c(
+    "Numérica continua",
     "DL (1<), 2D (1-1.5), 4D (2), 6D (3), BL (3 >)",
     "Primípara, Multípara",
     "Numérica continua",
@@ -210,7 +213,6 @@ variables <- tibble(
     "Simple, Múltiple",
     "Chanchera, Embarcadero, Pradera",
     "Hembra, Macho",
-    "Numérica continua",
     "Ausencia, Presencia",
     "Ausencia, Presencia",
     "Normal, Alteración",
