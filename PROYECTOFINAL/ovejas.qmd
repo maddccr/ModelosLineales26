@@ -462,8 +462,16 @@ for(i in 1:length(cat_vars)) {
   print(g)
 }
 
-datos_preparto |> 
-  t_test(Gainseñal ~ Simet)
+```
+
+```{r}
+
+t.test(Gainseñal ~ Partos, data = datos_preparto)
+t.test(Gainseñal ~ LOTE, data = datos_preparto)
+t.test(Gainseñal ~ Tiponac, data = datos_preparto)
+#la media de gainse;al cambia entre tipos de parto
+#no cambia entre lotes
+#cambia entre tipos de nacimiento
 ```
 
 ## Análisis Multivariado (Interacciones)
@@ -487,26 +495,12 @@ group_index <- c(1,1,1,1,2,3,4,5,6,7,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
 
 cv_grpreg <- cv.grpreg(x_matrix, 
                        y_vector, 
-                       group = group_index, 
-                       penalty = "grLasso", 
-                       nfolds = nrow(x_matrix)) #leave one out
+                       group = group_index) #leave one out
 
 coef(cv_grpreg, s = "lambda.min")
 
 cv_grpreg$lambda.min
 
-#probamos con otros lambdas, a ver si no se pierden tantas variables
-
-coef(cv_grpreg, s = 0.008)
-coef(cv_grpreg, s = 0.007)
-coef(cv_grpreg, s = 0.006)
-coef(cv_grpreg, s = 0.005)
-coef(cv_grpreg, s = 0.004)
-coef(cv_grpreg, s = 0.003)
-coef(cv_grpreg, s = 0.002)
-coef(cv_grpreg, s = 0.001)
-coef(cv_grpreg, s = 1e-4)
-coef(cv_grpreg, s = 1e-5)
 #con este seed solo queda tiponac
 
 #GRÁFICOS
@@ -552,24 +546,24 @@ ggplot(df_long,
   labs(y = "beta") 
 
 #LASSO NORMAL
-library(glmnet)
-matriz <- model.matrix(modelin)[, -1]
+#library(glmnet)
+#matriz <- model.matrix(modelin)[, -1]
 
-y_vector_normal <- datos_preparto$Gainseñal
+#y_vector_normal <- datos_preparto$Gainseñal
 
-cv_glmnet <- cv.glmnet(y = y_vector_normal,
-                       x = matriz,
-                       alpha = 1)
-plot(cv_glmnet)
+#cv_glmnet <- cv.glmnet(y = y_vector_normal,
+#                       x = matriz,
+#                       alpha = 1)
+#plot(cv_glmnet)
 
-lambda_opt <- cv_glmnet$lambda.min
-modR <- glmnet(y = y_vector_normal,
-               x = matriz,
-               alpha = 1,
-               lambda = lambda_opt)
+#lambda_opt <- cv_glmnet$lambda.min
+#modR <- glmnet(y = y_vector_normal,
+#               x = matriz,
+#               alpha = 1,
+#               lambda = lambda_opt)
 
 
-coef(modR)
+#coef(modR)
 
 ```
 
