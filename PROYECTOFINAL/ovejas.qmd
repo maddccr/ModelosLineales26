@@ -17,12 +17,21 @@ library(knitr)
 library(rcartocolor)
 library(patchwork) 
 library(tibble)
+
+
 #PARA DIAGNOSTICO
 library(car)
 library(grpreg)
 library(ggrepel) 
 library(qqplotr)
 library(skedastic) 
+library(lmtest)
+library(mixlm) #back elim
+library(lm.beta) #betas stant
+library(relaimpo) 
+
+#LASSO NORMAL
+library(glmnet) 
 ```
 
 #### Data wrangling
@@ -73,7 +82,7 @@ datos_preparto <- datos_preparto |>
          Tiponac = as.factor(Tiponac),
          Potrepari = as.factor(Potrepari),
          Sex = as.factor(Sex),
-         Gainseñal = as.numeric(Gainseñal),
+         Gainseñal = 1000*as.numeric(Gainseñal), #cambio de unidad 
          Nodu = as.factor(Nodu),
          Induru = as.factor(Induru),
          Nodpez = as.factor(Nodpez),
@@ -84,7 +93,8 @@ datos_preparto <- datos_preparto |>
          Suspen = as.factor(Suspen),
          Separ = as.factor(Separ),
          Ubicpez = as.factor(Ubicpez),
-         Simet = as.factor(Simet) ) 
+         Simet = as.factor(Simet) ) |> 
+  relocate(Gainseñal)
 
 #str(datos_preparto)
 
@@ -103,8 +113,8 @@ datos_preparto <- datos_preparto |>
 datos_preparto <- datos_preparto |> 
   mutate(
     Partos = fct_recode(Partos,"Multipara" = "M","Primipara" = "P"),
-    LOTE = fct_recode(LOTE,"Inseminación artificial" = "IA",
-                           "Repaso con carnero" = "R"),
+    LOTE = fct_recode(LOTE,"Inseminación Art." = "IA",
+                           "Repaso Carnero" = "R"),
     Tiponac = fct_recode(Tiponac, "Simple" = "1","Múltiple" = "2"),
     Sex = fct_recode(Sex,"Hembra" = "H","Macho" = "M"),
     Nodu = fct_recode(Nodu, "Ausencia" = "0","Presencia" = "1"),
@@ -123,10 +133,12 @@ datos_preparto <- datos_preparto |>
 
 ```{r}
 #Para graficar
-cat_vars <- datos_preparto %>%
-  dplyr::select(where(is.factor)) %>%
-  dplyr::select(-Sex, -Potrepari) %>%
+cat_vars <- datos_preparto |> 
+  dplyr::select(where(is.factor))  |> 
+  dplyr::select(-Sex, -Potrepari)  |> 
   names()
+
+
 num_vars <- datos_preparto |> dplyr::select(where(is.numeric)) |> names() |> 
   setdiff("Gainseñal")
 
@@ -148,43 +160,42 @@ nombres_num <- c("Peso de la oveja",
                  "Condición corporal de la oveja",
                  "Largo de ubre (cm)",
                  "Ancho de ubre (cm)",
-                 "Ancho del pezon (cm)",
-                 "Largo pezon (cm)")
+                 "Ancho pezones (cm)",
+                 "Largo pezones (cm)")
 
 paleta <- c("#fcde9c","#faa476","#f0746e","#e34f6f","#dc3977","#b9257a","#7c1d6f")
-
-num_vars
 ```
 
-### Tabla de descripcion de variables
+### Tabla de descripción de variables
 
 ```{r}
 variables <- tibble(
   Variable = c(
+    "Gainseñal",
     "Edad", "Partos", "Pesove", "CCove", "LOTE",
-    "Tiponac", "Potrepari", "Sex", "Gainseñal",
+    "Tiponac", "Potrepari", "Sex", 
     "Nodu", "Induru", "Eco", "Lagubre",
     "Ancubre", "Anchopez", "Largopez", "Peznum",
     "Suspen", "Separ", "Ubicpez", "Simet"
   ),
 
   Descripción = c(
-    "Edad de la oveja",
+    "Ganancia media de peso diario del cordero hasta la señalada (gr/d)",
+    "Edad de la oveja (cronología dentaria)",
     "Número de partos",
-    "Peso de la oveja",
+    "Peso de la oveja (kg)",
     "Condición corporal de la oveja",
     "Manejo reproductivo",
     "Tipo de nacimiento",
     "Potrero donde nació el cordero",
     "Sexo del cordero",
-    "Ganancia media de peso diario del cordero hasta la señalada (g/d)",
     "Nodulos en ubre",
     "Induración en ubre",
     "Alteraciones ecográficas",
     "Largo de ubre (cm)",
     "Ancho de ubre (cm)",
-    "Ancho del pezón (cm)",
-    "Largo del pezón (cm)",
+    "Ancho promedio de los pezones(cm)",
+    "Largo promedio de los pezones(cm)",
     "Número de pezones",
     "Suspensión de la ubre",
     "Separación de la ubre",
@@ -193,26 +204,26 @@ variables <- tibble(
   ),
 
   `Tipo / Categorías` = c(
-    "DL, 2D, 4D, 6D, BL",
+    "Numérica continua",
+    "DL (1<), 2D (1-1.5), 4D (2), 6D (3), BL (3 >)",
     "Primípara, Multípara",
-    "Numérica (kg)",
-    "Numérica (1:muy flaca-5:muy gorda)",
+    "Numérica continua",
+    "Numérica discreta (1:muy flaca-5:muy gorda)",
     "Inseminación artificial, Repaso con carnero",
     "Simple, Múltiple",
     "Chanchera, Embarcadero, Pradera",
     "Hembra, Macho",
-    "Numérica",
     "Ausencia, Presencia",
     "Ausencia, Presencia",
     "Normal, Alteración",
-    "Numérica",
-    "Numérica",
-    "Numérica",
-    "Numérica",
+    "Numérica continua",
+    "Numérica continua",
+    "Numérica discreta (maso)",
+    "Numérica continua",
     "Ausencia, Presencia",
-    "Ancha, Cuadrada, Pendulada",
-    "Marcada, Moderada, Sin",
-    "Lateral, Vertical, Horizontal",
+    "Cuadrada, No cuadrada (ancha, pendulosa)",
+    "Sin, Con",
+    "Lateral, No lateral (vertical, horizontal)",
     "Simétrica, No simétrica"
   )
 )
@@ -239,7 +250,7 @@ ggplot(datos_preparto, aes(x = Gainseñal)) +
                    bins = 15,
                    alpha = 0.8) +
   
-  geom_density(fill = "#dc3977", alpha = 0.6, color = NA) +
+  geom_density(fill = paleta[5], alpha = 0.6, color = NA) +
   
   geom_vline(xintercept = mean(datos_preparto$Gainseñal),
              linetype = "dashed",
@@ -253,10 +264,8 @@ ggplot(datos_preparto, aes(x = Gainseñal)) +
   theme_minimal() +
   labs(x = "Ganancia media de peso diario",
        y = "Densidad",
-       title = "Distribución de la ganancia media de peso diario",
+       title = "Distribución de la ganancia media de peso diario (gr)",
        subtitle = "(Nacimiento hasta señalada)")
-
-#ACLARAR UNIDADES 
 ```
 
 ### Variables Explicativas Numéricas
@@ -281,7 +290,7 @@ for (i in 1:length(num_vars2)) {
                    bins = 15,
                    alpha = 0.8) +
     
-    geom_density(fill = "#dc3977",
+    geom_density(fill = paleta[5],
                  alpha = 0.55,
                  color = NA,
                  linewidth = 0.7) +
@@ -310,7 +319,7 @@ for (i in 1:length(num_disc)) {
   graficos <- ggplot(datos_preparto,
                      aes(x = factor(.data[[num_disc[i]]]))) +
     
-    geom_bar(fill = "#e34f6f",
+    geom_bar(fill = paleta[4],
              color = "white",
              alpha = 0.8) +
     
@@ -327,31 +336,55 @@ for (i in 1:length(num_disc)) {
 
 ```{r}
 datos_preparto |>
-  dplyr::select(all_of( c("Gainseñal", num_vars) )) |>
+  dplyr::select(all_of(c("Gainseñal", num_vars))) |>
   pivot_longer(
     everything(),
     names_to = "Variable",
     values_to = "Valor"
   ) |>
+  mutate(
+    Variable = dplyr::recode(
+      Variable,
+      "Gainseñal" = "Ganancia media de peso diario del cordero hasta la señalada (g/d)",
+      "Anchopez"  = "Ancho del pezón (cm)",
+      "Ancubre"   = "Ancho de ubre (cm)",
+      "CCove"     = "Condición corporal de la oveja",
+      "Lagubre"   = "Largo de ubre (cm)",
+      "Largopez"  = "Largo del pezón (cm)",
+      "Pesove"    = "Peso de la oveja"
+    )
+  ) |>
   group_by(Variable) |>
   summarise(
     Media = mean(Valor),
     Mediana = median(Valor),
-    Desvio = sd(Valor),
-    Minimo = min(Valor),
-    Maximo = max(Valor)
+    Desvío = sd(Valor),
+    Mínimo = min(Valor),
+    Máximo = max(Valor),
+    .groups = "drop"
   ) |>
+  mutate(
+    Variable = factor(
+      Variable,
+      levels = c(
+        "Ganancia media de peso diario del cordero hasta la señalada (g/d)",
+        "Ancho del pezón (cm)",
+        "Ancho de ubre (cm)",
+        "Condición corporal de la oveja",
+        "Largo de ubre (cm)",
+        "Largo del pezón (cm)",
+        "Peso de la oveja"
+      )
+    )
+  ) |>
+  arrange(Variable) |>
   kable(digits = 2)
-
-#PONER GAIN DE PRIMERA!!!!
 ```
 
 ### Variables Explicativas Categóricas
 
 ```{r}
 #Variables categóricas
-
-#HACER EN % Y PANELADO (CREO Q CON UN PIVOT LONGER)
 
 lista_graficos <- list()
 
@@ -372,14 +405,17 @@ for (i in 1:length(cat_vars)) {
 
 wrap_plots(lista_graficos, ncol = 4) +
   plot_annotation(title = "Variables explicativas categóricas",
+                  subtitle = "(Frecuencia relativa)",
                   theme = theme(
                     plot.title = element_text(
-                      size = 16,
+                      size = 12,
                       face = "bold",
+                      hjust = 0.5
+                    ),
+                    plot.subtitle = element_text(
                       hjust = 0.5
                     )
                   ))
-
 ```
 
 ## Análisis Bivariado (relaciones)
@@ -394,7 +430,7 @@ for (i in 1:length(num_vars)) {
                      aes(x= .data[[num_vars[i]]], 
                          y= Gainseñal)) +
     
-    geom_point(color = "#7c1d6f") +
+    geom_point(color = paleta[7]) +
     theme_minimal() +
     xlab(nombres_num[i]) +
     ylab("Ganancia media de peso diario")
@@ -403,12 +439,12 @@ for (i in 1:length(num_vars)) {
   
 }
   
-#AGREGAR RUIDO RANDOM?? Kruskal-Wallis
+#AGREGAR RUIDO RANDOM?? Kruskal-Wallis queeraeso
 ```
 
 ```{r}
 
-cor_m <- datos_preparto |> dplyr::select(all_of(num_vars)) |> cor(use = "complete.obs")
+cor_m <- datos_preparto |> dplyr::select(all_of( c(num_vars, "Gainseñal"))) |> cor(use = "complete.obs")
 
 ggcorrplot(cor_m,
            hc.order = TRUE,
@@ -416,10 +452,10 @@ ggcorrplot(cor_m,
            type = "lower",
            lab_size = 2,                  
            show.diag = FALSE,
-           colors = c("#faa476", "#FFFFFF", "#b9257a"), 
+           colors = c(paleta[2], "#FFFFFF", paleta[6]), 
            outline.color = NA,
            tl.cex = 10) +           
-  labs(caption = "Fig. 6: Matriz de correlaciones entre variables numéricas",
+  labs(title = "Matriz de correlaciones entre variables numéricas",
        x="", y ="") +
   
   theme(plot.caption = element_text(size = 12,
@@ -428,7 +464,7 @@ ggcorrplot(cor_m,
         plot.caption.position = "plot") +
   
   theme(
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 16),
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
     axis.text.y = element_text(size = 10),
     legend.title = element_text(size = 10),
@@ -443,15 +479,17 @@ det(cor_m) #no muy cero
 
 ### Variables Explicativas Categóricas y Respuesta
 
-```{r}
+```{r, eval = FALSE}
+
+lista_graficos <- list()
 
 for(i in 1:length(cat_vars)) {
    
-  g <- ggplot(datos_preparto, aes(x = .data[[cat_vars[i]]], 
+  lista_graficos[[i]]  <- ggplot(datos_preparto, aes(x = .data[[cat_vars[i]]], 
                              y = Gainseñal,
                              fill = .data[[cat_vars[i]]] )) + 
     geom_boxplot() +
-    ylab('Ganancia media de peso diario') +
+    ylab('') +
     xlab(nombres_cat[i]) +
     scale_fill_manual(values = paleta) +
     theme_minimal() +
@@ -459,7 +497,6 @@ for(i in 1:length(cat_vars)) {
           axis.title.x = element_text(margin = margin(t = 20)),
           axis.title.y = element_text(margin = margin(t = 20))) 
   
-  print(g)
 }
 
 ```
@@ -472,17 +509,34 @@ t.test(Gainseñal ~ Tiponac, data = datos_preparto)
 #la media de gainse;al cambia entre tipos de parto
 #no cambia entre lotes
 #cambia entre tipos de nacimiento
+
+wrap_plots(lista_graficos[c(1,2,4,7,9,12)], ncol = 3) +
+  plot_annotation(title = "Variables explicativas categóricas vs. Ganancia media de peso diario (eje Y)",
+                  subtitle = "",
+                  theme = theme(
+                    plot.title = element_text(
+                      size = 12,
+                      face = "bold",
+                      hjust = 0.5
+                    ),
+                    plot.subtitle = element_text(
+                      hjust = 0.5
+                    )
+                  ))
+
+#CAMBIAR TITULO Y Y AXIS GMPD 
+#Renombrar
+
 ```
 
-## Análisis Multivariado (Interacciones)
-
-## Selección de Variables
+## Selección de Variables (o eso pensábamos)
 
 ```{r}
 #Primer modelo aditivo con todo
 modelin <- lm(Gainseñal ~ ., data = datos_preparto)
-
 ```
+
+### LASSO
 
 ```{r}
 #LASSO :0
@@ -545,9 +599,13 @@ ggplot(df_long,
   theme_bw() +
   labs(y = "beta") 
 
+
 #LASSO NORMAL
 #library(glmnet)
 #matriz <- model.matrix(modelin)[, -1]
+
+matriz <- model.matrix(modelin)[, -1]
+
 
 #y_vector_normal <- datos_preparto$Gainseñal
 
@@ -567,13 +625,11 @@ ggplot(df_long,
 
 ```
 
-SERIAMENTE PENSANDO USAR EL BACKWARD NOMAS
+### AIC/BIC
 
 ```{r, eval=FALSE}
 #Por alta cantidad de variables --> no ajustar todos los modelos posibles
 #Metodo basado en log verosimilitud // criterios de informacion
-
-#VA A EXPLOTAR TODO
 
 modelo_aic <- step(modelin, trace=0)
 
@@ -598,8 +654,19 @@ df <- data.frame(
   AIC = c(AIC(modelo_aic), AIC(modelo_bic)),
   BIC = c(BIC(modelo_aic), BIC(modelo_bic))
 )
+```
 
-#QUEDARNOS LAS QUE QUEDEN EN AL MENOS UNO??
+### Backward Elimination (PdH)
+
+```{r}
+#backward eliminacion // basado en PdH // SUPUESTOS
+#con alpha= 0.1 se incluyen tendencias
+
+
+modB <- backward(modelin, alpha = 0.1) 
+length(coef(modB))  
+summary(modB)
+modB$call
 ```
 
 ## Diagnóstico
@@ -618,21 +685,16 @@ ncol(model.matrix(modelin)) - 1
 ```
 
 ```{r}
-#PREGUNTAR
+#KAPPA --> numero de condicion 
 
-#KAPPA
+X <- model.matrix(formula(modelin), data =
+                    datos_preparto |>  mutate_if(is.numeric, scale))
+kappa(X)
 
-X <- model.matrix(modelin) #OJO ESTA MATRIZ TIENE INTERCEPTO
-XTX <- t(X)%*%X
-lambdaX <- eigen(XTX)$values
-
-#nume de condicion
-KA <- sqrt(max(lambdaX)/min(lambdaX))
-KA #1504.954
-
-
-#PROBLEMAS POR VARIABLES CATEGORICAS???
-#PREGUNTAR A CHAT A
+#XTX <- t(X)%*%X
+#lambdaX <- eigen(XTX)$values
+#KA <- sqrt(max(lambdaX)/min(lambdaX))
+#KA 1504.954 // alto por no escalar
 ```
 
 ### Normalidad
@@ -648,17 +710,22 @@ qq <- data.frame(teoricos = z_i,
                  empiricos = sort(residuos))
 #qqplot
 qq |> ggplot(aes(sample = empiricos)) +
-  stat_qq_band(fill = 2) +
-  stat_qq_line(col = 2) +
-  stat_qq_point(alpha = 0.7, size = 2) +
+  stat_qq_band(fill = paleta[2], alpha = 0.5) +
+  stat_qq_point(alpha = 0.8, size = 2, col = paleta[5], shape = 19) +
+  stat_qq_line(col = paleta[7]) +
   xlab("Cuantiles teóricos")+
   ylab("Cuantiles empíricos") +
-  labs(title = "Evaluación de normalidad con QQ plot") +
+  labs(title = "Evaluación de normalidad de los residuos",
+       subtitle = "(QQ plot)") +
   theme_minimal() + 
   theme(
     plot.title = element_text(
+      size = 12,
       hjust = 0.5,
       face = "bold"
+    ),
+    plot.subtitle = element_text(
+      hjust = 0.5
     )
   )
 
@@ -680,10 +747,36 @@ datos_diagnostico <- datos_preparto
 datos_diagnostico$pred <- fitted(modelin)
 datos_diagnostico$residuos  <- residuals(modelin)
 
-for(i in num_vars2){
-  crPlot(modelin, variable = i, pch = 16)
+
+for(i in 1:4){
+ crPlot(
+    modelin,
+    variable = num_vars2[i],
+    id = FALSE,
+    ylab = "Residuos Parciales",
+    xlab = nombres_cont[i],
+
+    # puntos
+    pch = 16,
+    col = adjustcolor(paleta[6], alpha.f = 0.55),
+
+    # línea ajustada y suavizado
+    line = TRUE,
+    smooth = TRUE,
+    col.lines = c(paleta[2], paleta[7]),
+    lwd = 1.8,
+
+    # grilla
+    grid = TRUE
+  )
 }
 
+
+```
+
+```{r}
+#Test de linealidad 
+raintest(modelin)
 ```
 
 ### Homoscedasticidad
@@ -696,15 +789,29 @@ datos_diagnostico$t_i <- residuos #studentizados
 ggplot(datos_diagnostico,
        aes(x = fitted(modelin),
            y = residuos)) +
-  geom_point(color = "#b9257a",
+  geom_point(color = paleta[6],
     size = 1.5,
     alpha = 0.75) +
   geom_hline(yintercept = 0,
-    color = "black",
+    color = paleta[7],
     linetype = 2) +
-  xlab("Valores ajustados") +
-  ylab("Residuos studentizados")
+  xlab("Valores ajustados (Y)") +
+  ylab("Residuos studentizados") +
+  labs(title = "Evaluación de homocedasticidad de los residuos",
+       subtitle = "(Eye ball test)") +
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(
+      size = 12,
+      hjust = 0.5,
+      face = "bold"
+    ),
+    plot.subtitle = element_text(
+      hjust = 0.5
+    )
+  )
 
+#FALTA TITULO Y THEME MINIMAL #y MEJOR X LAB 
 ```
 
 ```{r}
@@ -714,7 +821,7 @@ for(i in 1:length(num_vars2)) {
   g <- ggplot(datos_diagnostico,
               aes(x = .data[[num_vars2[i]]],
                   y = residuos)) +
-    geom_point(color = "#b9257a",
+    geom_point(color = paleta[6],
     size = 1.5,
     alpha = 0.75) +
   geom_hline(yintercept = 0,
@@ -736,7 +843,7 @@ for(i in 1:length(cat_vars)) {
   g <- ggplot(datos_diagnostico,
               aes(x = .data[[cat_vars[i]]],
                   y = residuos)) +
-    geom_boxplot(fill = "#dc3977") +
+    geom_boxplot(fill = paleta[5]) +
     theme_minimal() +
     xlab(nombres_cat[i]) +
     ylab("Residuos studentizados")
@@ -753,7 +860,7 @@ for(i in 1:length(cat_vars)) {
 breusch_pagan(modelin)
 ```
 
-### Datos atipicos/influyentes
+### Datos atípicos/influyentes
 
 ```{r}
 #atipicos
@@ -766,14 +873,14 @@ ggplot(df_res,
        aes(x = i, y = t_i)) +
 
   geom_point(
-    color = "#b9257a",
+    color = paleta[6],
     size = 1.5,
     alpha = 0.8
   ) +
 
   geom_hline(
     yintercept = c(-2, 2),
-    color = "#faa476",
+    color = paleta[2],
     linetype = "dashed",
     linewidth = 0.8
   ) +
@@ -782,16 +889,22 @@ ggplot(df_res,
     yintercept = 0,
     color = "grey50"
   ) +
-
-  theme_classic() +
-
   labs(
     x = "Observación",
-    y = "Residuo studentizado"
+    y = "Residuos studentizados",
+    title = ""
   ) +
 
+ theme_minimal() + 
   theme(
-    text = element_text(size = 12)
+    plot.title = element_text(
+      size = 12,
+      hjust = 0.5,
+      face = "bold"
+    ),
+    plot.subtitle = element_text(
+      hjust = 0.5
+    )
   )
 
 ```
@@ -834,21 +947,24 @@ ggplot(df, aes(x = i, y = D_i)) +
   ) +
 
   scale_color_manual(
-    values = c("#b9257a", "#faa476"),
-    labels = c("No influyente", "Potencialmente influyente"),
+    values = c(paleta[2], paleta[6]),
+    labels = c("No influyente", "Influyente"),
     name = ""
   ) +
-
-  labs(
-    x = "Observación",
-    y = "Distancia de Cook",
-    ) +
-
-  theme_classic() +
-
+ xlab("Observación") +
+  ylab("Distancia de Cook") +
+  labs(title = "Distancia de Cook",
+       subtitle = "(Detección de observaciones influyentes)") +
+  theme_minimal() + 
   theme(
-    legend.position = "bottom",
-    text = element_text(size = 12)
+    plot.title = element_text(
+      size = 12,
+      hjust = 0.5,
+      face = "bold"
+    ),
+    plot.subtitle = element_text(
+      hjust = 0.5
+    )
   )
 ```
 
@@ -870,7 +986,7 @@ which(D_i == max(D_i))
 ## Observación 43: LA OVEJA NEGRA
 
 ```{r}
-#modelo ajustado
+#modelo ajustado sin la obs 43
 datos_sin43 <- datos_preparto[-43, ]
 
 modelo_sin43 <- lm(
@@ -879,36 +995,26 @@ modelo_sin43 <- lm(
 )
 
 #comparar
-summary(modelin)
 
-summary(modelo_sin43)
-#nuevas variables significativas
-
-
-```
-
-```{r}
 #R-cuadrado ajustado 
 summary(modelin)$adj.r.squared
 summary(modelo_sin43)$adj.r.squared
 
-
-```
-
-```{r}
 #Anova
 Anova(modelin)
-
 Anova(modelo_sin43)
 ```
 
 ## Test vs Train
 
-```{r}
+```{r,warning=FALSE}
 library(tidymodels)
 set.seed(1234)
 datos_preparto_split <- initial_split(datos_preparto, prop = 0.80)
+
+43 %in% datos_preparto_split$in_id
 datos_preparto_split
+length(datos_preparto_split$in_id)
 ```
 
 ```{r}
@@ -966,32 +1072,59 @@ theme_bw()
 metrics(resultados_lm_test, truth = Gainseñal, estimate = .pred_lm)
 ```
 
-### ASUMIMOS MODELO FINAL PARA PREDECIR
-
-## Significaciones del Primer modelo
+## Pruebas de Significación
 
 ```{r}
 #primer modelo para ver significacion de las variables
 summary(modelin)
-Anova(modelin) #que hace?
+Anova(modelin) 
 ```
 
+## Modelo Final
+
 ```{r}
-#ajustamos modelo segun variables significativas al 10%? re elegir
+#ajustamos modelo segun variables significativas al 10% re elegir
 modelo <- lm(
-  Gainseñal ~ Pesove + Tiponac + Sex + CCove,
+  Gainseñal ~ Pesove + Tiponac + Sex + CCove + Edad,
   data = datos_preparto
 )
 
 summary(modelo)
 Anova(modelo)
+
+modB$call #agrega LOTE? 
+
+```
+
+### Variable más importante
+
+```{r}
+#Comparacion de los betas standarizados
+
+std <- lm.beta(modelo)
+(abs(std$standardized.coefficients))
+
+#Importancia relativa (% del R2)
+calc.relimp(modelo, type = "lmg", rela = TRUE) 
+
+```
+
+### Interacciones
+
+```{r}
+#Agregamos al modelo reducido interacciones de posible interes biologico
+
+modelo_int <- update(modelo, . ~ . + Ubicpez*Separ*Suspen + Anchopez*Largopez, data = datos_preparto)
+
+Anova(modelo_int)
+summary(modelo_int)
 ```
 
 ### PREDICCIONES
 
 ```{r}
 modelo_train <- lm(
-  Gainseñal ~ Pesove + Tiponac + Sex,
+  Gainseñal ~ Pesove + Tiponac + Sex + CCove + Edad,
   data = datos_preparto_train
 )
 ```
@@ -1019,7 +1152,8 @@ oveja_nueva <- data.frame(
   Tiponac = factor("Simple",
                    levels = levels(datos_preparto$Tiponac)),
   Sex = factor("Hembra",
-               levels = levels(datos_preparto$Sex))
+               levels = levels(datos_preparto$Sex)),
+  Edad = "BL"
 ) #elegir una oveja representativa ""
 
 oveja_nueva <- datos_preparto_test[1, names(model.frame(modelo_train))[-1]]#o una oveja del dataset ejemplo la primera
@@ -1041,9 +1175,9 @@ predict(
 
 segun chat :
 
-- **intervalo de confianza:** estima la **ganancia media esperada** para ovejas con esas características.
+-   **intervalo de confianza:** estima la **ganancia media esperada** para ovejas con esas características.
 
-- **Intervalo de predicción:** estima la **ganancia esperada de una oveja individual**, por eso es más amplio.
+-   **Intervalo de predicción:** estima la **ganancia esperada de una oveja individual**, por eso es más amplio.
 
 ```{r, eval = FALSE}
 #esta fue la primer prediccion la dle principio
