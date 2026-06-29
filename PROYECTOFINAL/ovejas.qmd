@@ -1171,6 +1171,9 @@ metrics(resultados, truth = Gainseñal, estimate = .pred)
 
 ```{r}
 #predicción de una observación futura
+
+oveja_nueva <- datos_preparto_test[1, names(model.frame(modelo_train))[-1]]#o una oveja del dataset ejemplo la primera
+
 oveja_nueva <- data.frame(
   Pesove = mean(datos_preparto$Pesove),
   CCove = mean(datos_preparto$CCove),
@@ -1181,7 +1184,6 @@ oveja_nueva <- data.frame(
   Edad = "BL"
 ) #elegir una oveja representativa ""
 
-oveja_nueva <- datos_preparto_test[1, names(model.frame(modelo_train))[-1]]#o una oveja del dataset ejemplo la primera
 
 predict(
   modelo_train,
@@ -1198,21 +1200,6 @@ predict(
 )
 ```
 
-segun chat :
-
 - **intervalo de confianza:** estima la **ganancia media esperada** para ovejas con esas características.
 
 - **Intervalo de predicción:** estima la **ganancia esperada de una oveja individual**, por eso es más amplio.
-
-```{r, eval = FALSE}
-#esta fue la primer prediccion la dle principio
-df <- data.frame(
-  Pesove = mean(datos_preparto$Pesove),
-  Tiponac = factor("Múltiple",
-                   levels = levels(datos_preparto$Tiponac))
-)
-predict(modelo_3,
-        newdata = df,
-        interval = "confidence",
-        level = 0.95)
-```
