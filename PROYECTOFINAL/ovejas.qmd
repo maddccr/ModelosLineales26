@@ -1120,7 +1120,7 @@ summary(modelo_int)
 
 ```{r}
 modelo_train <- lm(
-  Gainseñal ~ Pesove + Tiponac + Sex,
+  Gainseñal ~ Pesove + Tiponac + Sex + CCove + Edad,
   data = datos_preparto_train
 )
 ```
@@ -1148,7 +1148,8 @@ oveja_nueva <- data.frame(
   Tiponac = factor("Simple",
                    levels = levels(datos_preparto$Tiponac)),
   Sex = factor("Hembra",
-               levels = levels(datos_preparto$Sex))
+               levels = levels(datos_preparto$Sex)),
+  Edad = "BL"
 ) #elegir una oveja representativa ""
 
 oveja_nueva <- datos_preparto_test[1, names(model.frame(modelo_train))[-1]]#o una oveja del dataset ejemplo la primera
