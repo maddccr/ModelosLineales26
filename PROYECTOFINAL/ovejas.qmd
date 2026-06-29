@@ -416,6 +416,8 @@ wrap_plots(lista_graficos, ncol = 4) +
                       hjust = 0.5
                     )
                   ))
+
+
 ```
 
 ## Análisis Bivariado (relaciones)
@@ -738,35 +740,52 @@ ks.test(residuos, 'pnorm')
 ### Linealidad
 
 ```{r}
-
 datos_diagnostico <- datos_preparto
 datos_diagnostico$pred <- fitted(modelin)
 datos_diagnostico$residuos  <- residuals(modelin)
 
+par(
+  mfrow = c(2, 2),
+  oma = c(0, 0, 4, 0),   
+  mar = c(4, 4, 2, 1)
+)
 
 for(i in 1:4){
- crPlot(
+  crPlot(
     modelin,
     variable = num_vars2[i],
     id = FALSE,
-    ylab = "Residuos Parciales",
     xlab = nombres_cont[i],
-
-    # puntos
+    ylab = "Residuos parciales",
     pch = 16,
     col = adjustcolor(paleta[6], alpha.f = 0.55),
-
-    # línea ajustada y suavizado
     line = TRUE,
     smooth = TRUE,
     col.lines = c(paleta[2], paleta[7]),
     lwd = 1.8,
-
-    # grilla
     grid = TRUE
   )
 }
 
+mtext(
+  "Evaluación de linealidad para variables numéricas continuas",
+  side = 3,
+  outer = TRUE,
+  line = 2,
+  cex = 1,
+  font = 2
+)
+
+mtext(
+  "Gráficos de Residuos Parciales (Component + Residual)",
+  side = 3,
+  outer = TRUE,
+  line = 0.8,
+  cex = 0.8
+)
+
+
+par(mfrow = c(1,1))
 
 ```
 
@@ -888,7 +907,7 @@ ggplot(df_res,
   labs(
     x = "Observación",
     y = "Residuos studentizados",
-    title = ""
+    title = "Detección de datos atípicos"
   ) +
 
  theme_minimal() + 
