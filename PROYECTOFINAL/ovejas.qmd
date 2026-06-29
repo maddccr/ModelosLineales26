@@ -521,30 +521,20 @@ wrap_plots(lista_graficos[c(1,2,4,7,9,12)], ncol = 3) +
 
 ```{r}
 
-t.test(Gainseñal ~ Partos, data = datos_preparto)
-t.test(Gainseñal ~ LOTE, data = datos_preparto)
-t.test(Gainseñal ~ Tiponac, data = datos_preparto)
+#t-test para categoricas de dos niveles
+
+resultados <- lapply(cat_vars[-1], function(v) {
+  t.test(as.formula(paste("Gainseñal ~", v)), data = datos_preparto)
+})
 #la media de gainse;al cambia entre tipos de parto
 #no cambia entre lotes
 #cambia entre tipos de nacimiento
 
-wrap_plots(lista_graficos[c(1,2,4,7,9,12)], ncol = 3) +
-  plot_annotation(title = "Variables explicativas categóricas vs. Ganancia media de peso diario (eje Y)",
-                  subtitle = "",
-                  theme = theme(
-                    plot.title = element_text(
-                      size = 12,
-                      face = "bold",
-                      hjust = 0.5
-                    ),
-                    plot.subtitle = element_text(
-                      hjust = 0.5
-                    )
-                  ))
-
-#CAMBIAR TITULO Y Y AXIS GMPD 
-#Renombrar
-
+data.frame(
+  Variable = cat_vars[-1],
+  pvalor = format(sapply(resultados, function(x) x$p.value),
+                  scientific = FALSE
+))
 ```
 
 ## Selección de Variables (o eso pensábamos)
@@ -1210,9 +1200,9 @@ predict(
 
 segun chat :
 
--   **intervalo de confianza:** estima la **ganancia media esperada** para ovejas con esas características.
+- **intervalo de confianza:** estima la **ganancia media esperada** para ovejas con esas características.
 
--   **Intervalo de predicción:** estima la **ganancia esperada de una oveja individual**, por eso es más amplio.
+- **Intervalo de predicción:** estima la **ganancia esperada de una oveja individual**, por eso es más amplio.
 
 ```{r, eval = FALSE}
 #esta fue la primer prediccion la dle principio
