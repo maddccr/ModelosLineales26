@@ -501,6 +501,22 @@ for(i in 1:length(cat_vars)) {
   
 }
 
+wrap_plots(lista_graficos[c(1,2,4,7,9,12)], ncol = 3) +
+  plot_annotation(title = "Variables explicativas categóricas vs. Ganancia media de peso diario (eje Y)",
+                  subtitle = "",
+                  theme = theme(
+                    plot.title = element_text(
+                      size = 12,
+                      face = "bold",
+                      hjust = 0.5
+                    ),
+                    plot.subtitle = element_text(
+                      hjust = 0.5
+                    )
+                  ))
+
+#CAMBIAR TITULO Y Y AXIS GMPD 
+#Renombrar
 ```
 
 ```{r}
