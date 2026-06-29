@@ -336,25 +336,49 @@ for (i in 1:length(num_disc)) {
 
 ```{r}
 datos_preparto |>
-  dplyr::select(all_of( c("Gainseñal", num_vars) )) |>
+  dplyr::select(all_of(c("Gainseñal", num_vars))) |>
   pivot_longer(
     everything(),
     names_to = "Variable",
     values_to = "Valor"
   ) |>
+  mutate(
+    Variable = dplyr::recode(
+      Variable,
+      "Gainseñal" = "Ganancia media de peso diario del cordero hasta la señalada (g/d)",
+      "Anchopez"  = "Ancho del pezón (cm)",
+      "Ancubre"   = "Ancho de ubre (cm)",
+      "CCove"     = "Condición corporal de la oveja",
+      "Lagubre"   = "Largo de ubre (cm)",
+      "Largopez"  = "Largo del pezón (cm)",
+      "Pesove"    = "Peso de la oveja"
+    )
+  ) |>
   group_by(Variable) |>
   summarise(
     Media = mean(Valor),
     Mediana = median(Valor),
-    Desvio = sd(Valor),
-    Minimo = min(Valor),
-    Maximo = max(Valor)
+    Desvío = sd(Valor),
+    Mínimo = min(Valor),
+    Máximo = max(Valor),
+    .groups = "drop"
   ) |>
+  mutate(
+    Variable = factor(
+      Variable,
+      levels = c(
+        "Ganancia media de peso diario del cordero hasta la señalada (g/d)",
+        "Ancho del pezón (cm)",
+        "Ancho de ubre (cm)",
+        "Condición corporal de la oveja",
+        "Largo de ubre (cm)",
+        "Largo del pezón (cm)",
+        "Peso de la oveja"
+      )
+    )
+  ) |>
+  arrange(Variable) |>
   kable(digits = 2)
-
-#PONER GAIN DE PRIMERA!!!!
-#REMOBRAR VARIABLES Y PONER UNIDADES
-#OJO TILDES
 ```
 
 ### Variables Explicativas Categóricas
@@ -923,19 +947,21 @@ ggplot(df, aes(x = i, y = D_i)) +
     labels = c("No influyente", "Potencialmente influyente"),
     name = ""
   ) +
-
-  labs(
-    x = "Observación",
-    y = "Distancia de Cook",
-    ) +
-
-  theme_classic() +
-
+ xlab("Observación") +
+  ylab("Distancia de Cook") +
+  labs(title = "Distancia de Cook",
+       subtitle = "(Detección de observaciones influyentes)") +
+  theme_minimal() + 
   theme(
-    legend.position = "bottom",
-    text = element_text(size = 12)
+    plot.title = element_text(
+      size = 12,
+      hjust = 0.5,
+      face = "bold"
+    ),
+    plot.subtitle = element_text(
+      hjust = 0.5
+    )
   )
-
 ```
 
 ```{r}
