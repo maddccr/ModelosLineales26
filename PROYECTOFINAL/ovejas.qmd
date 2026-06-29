@@ -943,8 +943,8 @@ ggplot(df, aes(x = i, y = D_i)) +
   ) +
 
   scale_color_manual(
-    values = c(paleta[6], paleta[2]),
-    labels = c("No influyente", "Potencialmente influyente"),
+    values = c(paleta[2], paleta[6]),
+    labels = c("No influyente", "Influyente"),
     name = ""
   ) +
  xlab("Observación") +
