@@ -1003,7 +1003,7 @@ Anova(modelo_sin43)
 
 ## Test vs Train
 
-```{r}
+```{r,warning=FALSE}
 library(tidymodels)
 set.seed(1234)
 datos_preparto_split <- initial_split(datos_preparto, prop = 0.80)
