@@ -1100,6 +1100,7 @@ metrics(resultados_lm_test, truth = Gainseñal, estimate = .pred_lm)
 ## Pruebas de Significación
 
 ```{r}
+library(kableExtra)
 #primer modelo para ver significacion de las variables
 summary_tab <- summary(modelin)
 anova_tab <- Anova(modelin) 
@@ -1353,3 +1354,83 @@ predict(
 -   **intervalo de confianza:** estima la **ganancia media esperada** para ovejas con esas características.
 
 -   **Intervalo de predicción:** estima la **ganancia esperada de una oveja individual**, por eso es más amplio.
+
+```{r}
+tabla_r2 <- tibble(
+  Modelo = c(
+    "Modelo inicial",
+    "Train",
+    "Test",
+    "Modelo final"
+  ),
+  `R²` = c(
+    summary(modelin)$r.squared,
+    metrics(resultados_lm_train,
+            truth = Gainseñal,
+            estimate = .pred_lm) |>
+      filter(.metric == "rsq") |>
+      pull(.estimate),
+    metrics(resultados_lm_test,
+            truth = Gainseñal,
+            estimate = .pred_lm) |>
+      filter(.metric == "rsq") |>
+      pull(.estimate),
+    summary(modelo)$r.squared
+  ),
+  `R² ajustado` = c(
+    summary(modelin)$adj.r.squared,
+    NA,
+    NA,
+    summary(modelo)$adj.r.squared
+  )
+) |>
+  mutate(
+    `R²` = round(`R²`, 2),
+    `R² ajustado` = round(`R² ajustado`, 2),
+    `R² ajustado` = ifelse(is.na(`R² ajustado`), "-", as.character(`R² ajustado`))
+  )
+
+tabla_r2 |>
+  kable(
+    digits = 2,
+    align = c("l", "c", "c"),
+    caption = "Comparación de los coeficientes de determinación obtenidos en los distintos modelos."
+  )
+```
+
+```{r}
+tabla_f <- tibble(
+  Modelo = c("Modelo inicial", "Modelo final"),
+  
+  F = c(
+    summary(modelin)$fstatistic[1],
+    summary(modelo)$fstatistic[1]
+  ),
+  
+  gl1 = c(
+    summary(modelin)$fstatistic[2],
+    summary(modelo)$fstatistic[2]
+  ),
+  
+  gl2 = c(
+    summary(modelin)$fstatistic[3],
+    summary(modelo)$fstatistic[3]
+  ),
+  
+  p_value = c(
+    pf(summary(modelin)$fstatistic[1],
+       summary(modelin)$fstatistic[2],
+       summary(modelin)$fstatistic[3],
+       lower.tail = FALSE),
+    
+    pf(summary(modelo)$fstatistic[1],
+       summary(modelo)$fstatistic[2],
+       summary(modelo)$fstatistic[3],
+       lower.tail = FALSE)
+  )
+)
+
+tabla_f |>
+  mutate(across(where(is.numeric), ~ round(.x, 4))) |>
+  kable(caption = "F-statistic completo de ambos modelos")
+```
