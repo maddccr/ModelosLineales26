@@ -1359,12 +1359,14 @@ predict(
 tabla_r2 <- tibble(
   Modelo = c(
     "Modelo inicial",
+    "Modelo sin la Oveja Negra",
     "Train",
     "Test",
     "Modelo final"
   ),
   `R²` = c(
     summary(modelin)$r.squared,
+    summary(modelo_sin43)$r.squared,
     metrics(resultados_lm_train,
             truth = Gainseñal,
             estimate = .pred_lm) |>
@@ -1379,6 +1381,7 @@ tabla_r2 <- tibble(
   ),
   `R² ajustado` = c(
     summary(modelin)$adj.r.squared,
+    summary(modelo_sin43)$adj.r.squared,
     NA,
     NA,
     summary(modelo)$adj.r.squared
