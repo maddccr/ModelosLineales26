@@ -1101,8 +1101,60 @@ metrics(resultados_lm_test, truth = Gainseñal, estimate = .pred_lm)
 
 ```{r}
 #primer modelo para ver significacion de las variables
-summary(modelin)
-Anova(modelin) 
+summary_tab <- summary(modelin)
+anova_tab <- Anova(modelin) 
+#tablita anova
+tabla_anova<- as.data.frame(anova_tab)
+tabla_anova$Variable <- rownames(tabla_anova)# Agregar el nombre de las variables
+rownames(tabla_anova) <- NULL
+
+tabla_anova<- tabla_anova %>%
+  dplyr::select(Variable, `Sum Sq`, Df, `F value`, `Pr(>F)`) %>%
+  mutate(
+    Decisión = ifelse(`Pr(>F)` < 0.05,
+                      "Se rechaza H₀",
+                      "No se rechaza H₀")
+  ) 
+kable(
+  tabla_anova,
+  digits = c(0, 0, 0, 2, 4, 0),
+  col.names = c("Variable", "Suma de cuadrados", "GL",
+                "Estadístico F", "p-valor", "Decisión")
+)
+
+#tablita summary
+# Extraigo la tabla de coeficientes
+tabla_sum <- as.data.frame(summary_tab$coefficients)
+
+# Agrego el nombre de las variables
+tabla_sum$Variable <- rownames(tabla_sum)
+rownames(tabla_sum) <- NULL
+# Reordeno 
+tabla_sum <- tabla_sum %>%
+  dplyr::select(
+    Variable,
+    Estimate,
+    `Std. Error`,
+    `Pr(>|t|)`
+  ) %>%
+  dplyr::mutate(
+    Decisión = ifelse(`Pr(>|t|)` < 0.05,
+                      "Se rechaza H₀",
+                      "No se rechaza H₀")
+  )
+
+kable(
+  tabla_sum,
+  digits = c(0, 3, 3, 4, 0),
+  col.names = c(
+    "Variable",
+    "Estimación",
+    "Error estándar",
+    "p-valor",
+    "Decisión"
+  )
+)
+
 ```
 
 ## Modelo Final
@@ -1117,8 +1169,61 @@ modelo <- lm(
 summary(modelo)
 Anova(modelo)
 
-modB$call #agrega LOTE? 
+modB$call
 
+summary_tab_mod <- summary(modelo)
+anova_tab_mod <- Anova(modelo) 
+#tablita anova
+tabla_anova_mod<- as.data.frame(anova_tab_mod)
+tabla_anova_mod$Variable <- rownames(tabla_anova_mod)# Agregar el nombre de las variables
+rownames(tabla_anova_mod) <- NULL
+
+tabla_anova_mod<- tabla_anova_mod %>%
+  dplyr::select(Variable, `Sum Sq`, Df, `F value`, `Pr(>F)`) %>%
+  mutate(
+    Decisión = ifelse(`Pr(>F)` < 0.05,
+                      "Se rechaza H₀",
+                      "No se rechaza H₀")
+  ) 
+kable(
+  tabla_anova_mod,
+  digits = c(0, 0, 0, 2, 4, 0),
+  col.names = c("Variable", "Suma de cuadrados", "GL",
+                "Estadístico F", "p-valor", "Decisión")
+)
+
+#tablita summary
+# Extraigo la tabla de coeficientes
+tabla_sum_mod <- as.data.frame(summary_tab_mod$coefficients)
+
+# Agrego el nombre de las variables
+tabla_sum_mod$Variable <- rownames(tabla_sum_mod)
+rownames(tabla_sum_mod) <- NULL
+# Reordeno 
+tabla_sum_mod <- tabla_sum_mod %>%
+  dplyr::select(
+    Variable,
+    Estimate,
+    `Std. Error`,
+    `Pr(>|t|)`
+  ) %>%
+  dplyr::mutate(
+    Decisión = ifelse(`Pr(>|t|)` < 0.05,
+                      "Se rechaza H₀",
+                      "No se rechaza H₀")
+  )
+
+kable(
+  tabla_sum_mod,
+  digits = c(0, 3, 3, 4, 0),
+  col.names = c(
+    "Variable",
+    "Estimación",
+    "Error estándar",
+    "p-valor",
+    "Decisión"
+  )
+)
 ```
 
 ### Variable más importante
