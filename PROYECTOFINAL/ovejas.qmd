@@ -1200,6 +1200,6 @@ predict(
 )
 ```
 
-- **intervalo de confianza:** estima la **ganancia media esperada** para ovejas con esas características.
+-   **intervalo de confianza:** estima la **ganancia media esperada** para ovejas con esas características.
 
-- **Intervalo de predicción:** estima la **ganancia esperada de una oveja individual**, por eso es más amplio.
+-   **Intervalo de predicción:** estima la **ganancia esperada de una oveja individual**, por eso es más amplio.
